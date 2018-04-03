@@ -1,6 +1,6 @@
 <?php
 
-namespace Bolt\Extension\YourName\ExtensionName;
+namespace Bolt\Extension\TwoKings\ImportWebConnect;
 
 use Bolt\Extension\SimpleExtension;
 
@@ -9,6 +9,6 @@ use Bolt\Extension\SimpleExtension;
  *
  * @author Your Name <you@example.com>
  */
-class ExtensionNameExtension extends SimpleExtension
+class ImportWebConnectExtension extends SimpleExtension
 {
 }
