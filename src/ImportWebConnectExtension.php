@@ -40,4 +40,42 @@ class ImportWebConnectExtension extends SimpleExtension
 
         return [$adminMenuEntry];
     }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getDefaultConfig()
+    {
+        return [
+            'remote' => [
+                'enabled' => false,
+                'host' => 'https://academie.backend.webconnect.nl',
+                'uri' => '/webservice/academie.php',
+                'headers' => [
+                    'Content-type' => 'application/json'
+                ],
+                'username' => 'set this in local config',
+                'password' => 'set this in local config',
+            ],
+            'acceptance' => [
+                'enabled' => true,
+                'host' => 'https://academie.backend.webconnect.nl',
+                'uri' => '/webservice/academie.php',
+                'headers' => [
+                    'Content-type' => 'application/json'
+                ],
+                'username' => 'set this in local config',
+                'password' => 'set this in local config',
+            ],
+            'target' => [
+                'contenttype' => 'cursussen',
+                'ownerid' => 3,
+                'active' => 'published',
+                'inactive' => 'held',
+                'planningcontenttype' => 'planningen'
+            ]
+        ];
+    }
+
 }
