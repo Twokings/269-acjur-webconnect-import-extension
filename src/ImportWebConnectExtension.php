@@ -48,7 +48,7 @@ class ImportWebConnectExtension extends SimpleExtension
     {
         return [
             $this,
-            new Provider\ImportWebConnectProvider()
+            new Provider\ImportWebConnectProvider($this->getConfig())
         ];
     }
 
