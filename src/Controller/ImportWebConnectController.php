@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @author Néstor de Dios Fernández <nestor@twokings.nl>
  */
-class NotarisController extends Base
+class ImportWebConnectController extends Base
 {
     /**
      * {@inheritdoc}

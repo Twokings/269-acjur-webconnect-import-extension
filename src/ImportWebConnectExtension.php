@@ -41,6 +41,16 @@ class ImportWebConnectExtension extends SimpleExtension
         return [$adminMenuEntry];
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getServiceProviders()
+    {
+        return [
+            $this,
+            new Provider\ImportWebConnectProvider()
+        ];
+    }
 
     /**
      * {@inheritdoc}
