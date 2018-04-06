@@ -55,6 +55,30 @@ class ImportWebConnectExtension extends SimpleExtension
     /**
      * {@inheritdoc}
      */
+    protected function registerBackendControllers()
+    {
+        return [
+            '/' => new Controller\ImportWebConnectController(),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerTwigPaths()
+    {
+        return [
+            'templates' => [
+                'position'  => 'prepend',
+                'namespace' => 'importwebconnect'
+            ]
+        ];
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
     protected function getDefaultConfig()
     {
         return [
