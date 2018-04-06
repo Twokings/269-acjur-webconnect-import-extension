@@ -49,8 +49,39 @@ class ImportWebConnectController extends Base
      * @param Application $app
      * @param Request     $request
      */
-    public function importwebconnectBackendPage(Application $app, Request $request)
+    public function importwebconnectBackendPage(Request $request)
     {
+        $results = $this->app['importwebconnect.service']->fetchData();
+
+        $messages = [];
+
+        if($request->query->get('confirmed') == 'looksgood') {
+            $message = 'Starting WebConnect import from site.';
+            $this->app['logger.system']->info($message, ['event' => 'import']);
+
+            $messages[] = $message;
+            $number_of_cursussen = 0;
+            // $app['importwebconnect.service']->depublishAllCursussen();
+
+            foreach($results->result as $cursus) {
+                $messages[] = $this->app['importwebconnect.service']->saveCursus($cursus);
+                $number_of_cursussen++;
+            }
+
+            $message = 'Finished WebConnect import, ' . $number_of_cursussen . ' cursus records imported.';
+            $this->app['logger.system']->info($message, ['event' => 'import']);
+            $messages[] = $message;
+            $results = null;
+        }
+
+
+        $html = $this->render('@importwebconnect/import_webconnect_backend.twig', [
+            'title'  => 'Import WebConnect',
+            'results' => $results,
+            'messages' => $messages
+        ], []);
+
+        return $html;
 
     }
 }
