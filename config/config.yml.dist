@@ -1,18 +1,21 @@
 remote:
-    production:
-        enabled: false
-        host: https://academie.backend.webconnect.nl
-        uri: /webservice/academie.php
-        headers:
-            'Content-type': 'application/json'
-        username: 'set this in local config'
-        password: 'set this in local config'
-    acceptance:
-        enabled: false
-        host: https://acceptatie-academie.backend.webconnect.nl
-        uri: /webservice/academie.php
-        headers:
-            'Content-type': 'application/json'
+#    enabled: false
+#    host: https://academie.backend.webconnect.nl
+#    uri: /webservice/academie.php
+#    headers:
+#        'Content-type': 'application/json'
+    host: https://acceptatie-academie.backend.webconnect.nl
+    uri: /webservice/academie.php
+    headers:
+        'Content-type': 'application/json'
+    get_courses:
+        'u': 'set this in local config'
+        'p': 'set this in local config'
+        'm': 'get_cursusuitvoeringen'
+    get_events:
+        'u': 'set this in local config'
+        'p': 'set this in local config'
+        'm': 'get_events'
 target:
     contenttype: cursussen
     ownerid: 3
