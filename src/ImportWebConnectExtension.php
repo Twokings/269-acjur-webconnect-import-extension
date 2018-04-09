@@ -4,6 +4,8 @@ namespace Bolt\Extension\TwoKings\ImportWebConnect;
 
 use Bolt\Extension\SimpleExtension;
 use Bolt\Menu\MenuEntry;
+use Bolt\Extension\TwoKings\ImportWebConnect\Nut;
+use Pimple as Container;
 
 /**
  * ImportWebConnect extension class.
@@ -59,6 +61,16 @@ class ImportWebConnectExtension extends SimpleExtension
     {
         return [
             '/' => new Controller\ImportWebConnectController(),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerNutCommands(Container $container)
+    {
+        return [
+            new Nut\ImportWebConnectCommand($container),
         ];
     }
 

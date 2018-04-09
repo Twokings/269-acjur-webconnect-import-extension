@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @author Néstor de Dios Fernández <nestor@twokings.nl>
  */
-class ImportWebConnect extends BaseCommand
+class ImportWebConnectCommand extends BaseCommand
 {
     protected function configure()
   {
@@ -33,7 +33,7 @@ class ImportWebConnect extends BaseCommand
   {
     $messages = [];
 
-    $results = $this->app['importwebconnect.service']->fetchRemoteData();
+    $results = $this->app['importwebconnect.service']->fetchData();
 
     $message = 'Starting WebConnect import';
     if ($input->getOption('log')) {
@@ -45,7 +45,7 @@ class ImportWebConnect extends BaseCommand
 
     $number_of_cursussen = 0;
 
-    foreach($results as $cursus) {
+    foreach($results->result as $cursus) {
         $message = $this->app['importwebconnect.service']->saveCursus($cursus);
 
         if ($input->getOption('log')) {
