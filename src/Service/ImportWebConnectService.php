@@ -19,6 +19,7 @@ class ImportWebConnectService
     private $results;           // results from soap request
     private $cursussenRepository; // content repository cursussen
     private $planningenRepository; // content repository planningen
+    private $docentenRepository; // content repository docenten
     private $client;
     private $logger;
 
@@ -37,6 +38,7 @@ class ImportWebConnectService
         $this->client = $client;
         $this->cursussenRepository = $this->app['storage']->getRepository($this->config['target']['contenttype']);
         $this->planningenRepository = $this->app['storage']->getRepository($this->config['target']['planningcontenttype']);
+        $this->docentenRepository = $this->app['storage']->getRepository($this->config['target']['docentencontenttype']);
     }
 
     /**
@@ -245,6 +247,13 @@ class ImportWebConnectService
             $this->savePlanningen($cursus, $record);
         }
 
+        if (!empty($cursus->docent) && count($cursus->docent) >= 1) {
+            $count = count($cursus->docent);
+            foreach ($cursus->docent as $docent) {
+                $this->saveDocent($docent);
+            }
+        }
+
         $message = sprintf($message, $record->naam, $record->cursusid, $record->id);
 
         return $message;
@@ -309,5 +318,41 @@ class ImportWebConnectService
         }
     }
 
+    /**
+     * Save/Update Docenten from Cursussen
+     *
+     * This function will Save a new Docent or Update a Docent if it already exists.
+     * For updates to work 'save_only' option has to be set to false in extensions' cofig.yml
+     *
+     * @param $cursus
+     * @param $record
+     */
+    private function saveDocent($docent)
+    {
+        $docentRecord = $this->docentenRepository->findOneBy(['docent_id' => $docent->docent_id]);
+
+        if(!$docentRecord) {
+            $message = 'Docent: %s was inserted (%d - %d)';
+            $docentRecord = new Content();
+            $docentRecord->datepublish = new DateTime();
+            $docentRecord->datecreated = new DateTime();
+            $docentRecord->ownerid = $this->config['target']['ownerid'];
+            $docentRecord->slug = $this->app['slugify']->slugify($docent->naam_docent);
+            $docentRecord->docent_id = $docent->docent_id;
+            $docentRecord->naam_docent = $docent->naam_docent;
+            $docentRecord->functie = $docent->functie;
+            $docentRecord->naam_bedrijf = $docent->naam_bedrijf;
+        } elseif($this->config['save_only'] == false && !empty($docentRecord)) {
+            $docentRecord->datechanged = new DateTime();
+            $docentRecord->naam_docent = $docent->naam_docent;
+            $docentRecord->functie = $docent->functie;
+            $docentRecord->naam_bedrijf = $docent->naam_bedrijf;
+        }
+
+        $docentRecord->status = 'published';
+
+        $this->docentenRepository->save($docentRecord);
+
+    }
 
 }

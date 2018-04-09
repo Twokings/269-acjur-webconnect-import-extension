@@ -119,7 +119,8 @@ class ImportWebConnectExtension extends SimpleExtension
                 'ownerid' => 3,
                 'active' => 'published',
                 'inactive' => 'held',
-                'planningcontenttype' => 'planningen'
+                'planningcontenttype' => 'planningen',
+                'docentencontenttype' => 'docenten'
             ]
         ];
     }
