@@ -61,7 +61,7 @@ class ImportWebConnectController extends Base
 
             $messages[] = $message;
             $number_of_cursussen = 0;
-            // $app['importwebconnect.service']->depublishAllCursussen();
+            $this->app['importwebconnect.service']->depublishAllCursussen();
 
             foreach($results->result as $cursus) {
                 $messages[] = $this->app['importwebconnect.service']->saveCursus($cursus);
