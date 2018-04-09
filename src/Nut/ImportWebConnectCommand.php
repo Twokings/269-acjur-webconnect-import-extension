@@ -15,4 +15,50 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ImportWebConnect extends BaseCommand
 {
+    protected function configure()
+  {
+    $this
+      ->setName('importwebconnect:import')
+      ->setDescription('Import cusussen from WebConnect')
+      ->addOption(
+        'log',
+        null,
+        InputOption::VALUE_NONE,
+        'Show log in console.'
+     )
+    ;
+  }
+
+  protected function execute(InputInterface $input, OutputInterface $output)
+  {
+    $messages = [];
+
+    $results = $this->app['importwebconnect.service']->fetchRemoteData();
+
+    $message = 'Starting WebConnect import';
+    if ($input->getOption('log')) {
+      $output->writeln($message);
+    }
+    $this->app['logger.system']->info($message, ['event' => 'import']);
+
+    $this->app['importwebconnect.service']->depublishAllCursussen();
+
+    $number_of_cursussen = 0;
+
+    foreach($results as $cursus) {
+        $message = $this->app['importwebconnect.service']->saveCursus($cursus);
+
+        if ($input->getOption('log')) {
+          $output->writeln($message);
+        }
+
+        $number_of_cursussen++;
+    }
+
+    $message = 'Finished WebConnect import, ' . $number_of_cursussen . ' cursus records imported.';
+    if ($input->getOption('log')) {
+      $output->writeln($message);
+    }
+    $this->app['logger.system']->info($message, ['event' => 'import']);
+  }
 }
