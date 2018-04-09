@@ -4,6 +4,9 @@ remote:
 #    uri: /webservice/academie.php
 #    headers:
 #        'Content-type': 'application/json'
+#    username: 'set this in local config'
+#    password: 'set this in local config'
+    enabled: true
     host: https://acceptatie-academie.backend.webconnect.nl
     uri: /webservice/academie.php
     headers:
@@ -19,3 +22,7 @@ remote:
 target:
     contenttype: cursussen
     ownerid: 3
+
+# This option will update the Docenten contenttype when set to false and only save
+# Docenten when set to true.
+save_only: false
