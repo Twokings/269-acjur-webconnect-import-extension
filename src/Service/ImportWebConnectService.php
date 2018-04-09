@@ -297,9 +297,13 @@ class ImportWebConnectService
                 $enddate = "0000-00-00 00:00:00";
             }
             $planrecord->end_date = $enddate;
-            $planrecord->cursus_id = $record->cursus_id;
+            $planrecord->cursus_id = $cursus->uitvoering_id;
             $planrecord->locatie = $planning->locatie;
-            // $planrecord->docent = $planning->docenten;
+            $docentenIds = [];
+            foreach($planning->docenten as $docent) {
+                array_push($docentenIds, $docent->id);
+            }
+            $planrecord->docent = join(',', $docentenIds); //Comma separeted list of IDs
 
             $this->planningenRepository->save($planrecord);
         }
