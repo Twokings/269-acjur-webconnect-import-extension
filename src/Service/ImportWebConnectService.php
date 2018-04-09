@@ -36,7 +36,7 @@ class ImportWebConnectService
         $this->config = $app['importwebconnect.config'];
         $this->client = $client;
         $this->cursussenRepository = $this->app['storage']->getRepository($this->config['target']['contenttype']);
-        // $this->planrepo = $this->app['storage']->getRepository($this->config['target']['planningcontenttype']);
+        $this->planningenRepository = $this->app['storage']->getRepository($this->config['target']['planningcontenttype']);
     }
 
     /**
@@ -110,7 +110,7 @@ class ImportWebConnectService
      */
     public function depublishAllCursussen()
     {
-      $tablename = $this->repository->getTableName();
+      $tablename = $this->cursussenRepository->getTableName();
       $active = $this->config['target']['active'];
       $inactive = $this->config['target']['inactive'];
       if ($active !== $inactive) {
@@ -141,7 +141,7 @@ class ImportWebConnectService
      */
     public function depublishAllPlanningenByCursus($cursus_id)
     {
-      $tablename = $this->planrepo->getTableName();
+      $tablename = $this->planningenRepository->getTableName();
       return $this->deletePlannigen([
         'table' => $tablename,
         'field' => 'cursus_id',
@@ -239,14 +239,12 @@ class ImportWebConnectService
 
         $this->cursussenRepository->save($record);
 
-        // if (!empty($cursus['planningen']) && count($cursus['planningen']) >= 1) {
-            //$count = count($cursus['planningen']);
-            // echo '<p>saving ' . $count . ' cursusplanningen for '. $record->id . '</p>';
-            // $this->savePlanningen($cursus, $record);
-        // }
+        if (!empty($cursus->rooster) && count($cursus->rooster) >= 1) {
+            $count = count($cursus->rooster);
+            echo '<p>saving ' . $count . ' cursusplanningen for '. $record->id . "- $record->naam" . '</p>';
+            $this->savePlanningen($cursus, $record);
+        }
 
-        // $message = [$cursus, sprintf($message, $record->naam, $record->cursusid, $record->id)];
-        // dump($message);die();
         $message = sprintf($message, $record->naam, $record->cursusid, $record->id);
 
         return $message;
@@ -280,30 +278,30 @@ class ImportWebConnectService
     private function savePlanningen($cursus, $record)
     {
         $this->depublishAllPlanningenByCursus($record->id);
-        foreach($cursus['planningen'] as $planning) {
-            // echo '<p>saving cursusplanning '.$planning['StartDatumTijd'].' for '. $record->id . '</p>';
+        foreach($cursus->rooster as $planning) {
+            // echo '<p>saving cursusplanning '.$planning->start_tijd .' for '. $record->id . '</p>';
             $planrecord = new Content();
             $planrecord->datepublish = new DateTime();
             $planrecord->ownerid = $this->config['target']['ownerid'];
-            $planrecord->status = $this->config['target']['active'];
+            $planrecord->status = 'published';
             $planrecord->cursus_id = $record->id;
-            $planrecord->onderwerp = $planning['Onderwerp'];
-            $planrecord->slug = $this->app['slugify']->slugify($planning['Titel']);
-            $startdate = date("Y-m-d H:i:s", strtotime($planning['StartDatumTijd']));
+            $planrecord->onderwerp = $planning->naam;
+            $planrecord->slug = $this->app['slugify']->slugify($planning->naam);
+            $startdate = date("Y-m-d H:i:s", strtotime($planning->start_tijd));
             if ($startdate < "1000-01-01 00:00:00") {
                 $startdate = "0000-00-00 00:00:00";
             }
             $planrecord->start_date = $startdate;
-            $enddate = date("Y-m-d H:i:s", strtotime($planning['EindDatumTijd']));
+            $enddate = date("Y-m-d H:i:s", strtotime($planning->eind_tijd));
             if ($enddate < "1000-01-01 00:00:00") {
                 $enddate = "0000-00-00 00:00:00";
             }
             $planrecord->end_date = $enddate;
-            // $planrecord->cursus_id = $record->cursus_id;
-            $planrecord->locatie = $planning['Locatie'];
-            $planrecord->docent = $planning['Docenten'];
+            $planrecord->cursus_id = $record->cursus_id;
+            $planrecord->locatie = $planning->locatie;
+            // $planrecord->docent = $planning->docenten;
 
-            $this->planrepo->save($planrecord);
+            $this->planningenRepository->save($planrecord);
         }
     }
 
