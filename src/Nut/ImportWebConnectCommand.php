@@ -19,7 +19,7 @@ class ImportWebConnectCommand extends BaseCommand
   {
     $this
       ->setName('importwebconnect:import')
-      ->setDescription('Import cusussen from WebConnect')
+      ->setDescription('Import cursussen from WebConnect')
       ->addOption(
         'log',
         null,
