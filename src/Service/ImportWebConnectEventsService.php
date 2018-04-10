@@ -34,7 +34,7 @@ class ImportWebConnectEventsService
         $this->app = $app;
         $this->config = $app['importwebconnect.config'];
         $this->client = $client;
-        $this->eventsRepository = $this->app['storage']->getRepository($this->config['target']['eventscontenttype']);
+        $this->eventsRepository = $this->app['storage']->getRepository($this->config['remote']['get_events']['target']['contenttype']);
     }
 
     /**
@@ -45,7 +45,7 @@ class ImportWebConnectEventsService
         // ini_set('max_execution_time', (5*60)); //300 seconds = 5 minutes
         $this->setupHeaders();
 
-        $useremote = $this->config['remote']['enabled'];
+        $useremote = $this->config['remote']['get_events']['enabled'];
         // only try to call the remote if the configuration allows us
         if ($useremote) {
             $target = $this->config['remote']['host'];
@@ -74,7 +74,7 @@ class ImportWebConnectEventsService
     {
         $url = $this->config['remote']['host'] . $this->config['remote']['uri'];
         $options['headers'] = $this->headers;
-        $options['query'] = $this->config['remote']['get_events'];
+        $options['query'] = $this->config['remote']['get_events']['query'];
 
         try {
             $this->results = $this->client->request('GET', $url, $options)->getBody();
@@ -93,8 +93,8 @@ class ImportWebConnectEventsService
     public function depublishAllEvents()
     {
       $tablename = $this->eventsRepository->getTableName();
-      $active = $this->config['target']['active'];
-      $inactive = $this->config['target']['inactive'];
+      $active = $this->config['remote']['get_events']['target']['active'];
+      $inactive = $this->config['remote']['get_events']['target']['inactive'];
       if ($active !== $inactive) {
         return $this->app['db']->prepare('TRUNCATE ' . $tablename )->execute();
       }
@@ -124,7 +124,7 @@ class ImportWebConnectEventsService
         if(!$eventRecord) {
             $eventRecord = new Content();
             $eventRecord->datepublish = new DateTime();
-            $eventRecord->ownerid = $this->config['target']['ownerid'];
+            $eventRecord->ownerid = $this->config['remote']['get_events']['target']['ownerid'];
             $message = 'Event: %s was inserted (%d - %d)';
         }
 

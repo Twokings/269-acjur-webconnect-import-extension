@@ -36,9 +36,9 @@ class ImportWebConnectCursussenService
         $this->app = $app;
         $this->config = $app['importwebconnect.config'];
         $this->client = $client;
-        $this->cursussenRepository = $this->app['storage']->getRepository($this->config['target']['contenttype']);
-        $this->planningenRepository = $this->app['storage']->getRepository($this->config['target']['planningcontenttype']);
-        $this->docentenRepository = $this->app['storage']->getRepository($this->config['target']['docentencontenttype']);
+        $this->cursussenRepository = $this->app['storage']->getRepository($this->config['remote']['get_courses']['target']['contenttype']);
+        $this->planningenRepository = $this->app['storage']->getRepository($this->config['remote']['get_courses']['target']['planningcontenttype']);
+        $this->docentenRepository = $this->app['storage']->getRepository($this->config['remote']['get_courses']['target']['docentencontenttype']);
     }
 
     /**
@@ -50,7 +50,7 @@ class ImportWebConnectCursussenService
         $this->setupHeaders();
 
         // $uselocal = $this->config['local']['enabled'];
-        $useremote = $this->config['remote']['enabled'];
+        $useremote = $this->config['remote']['get_courses']['enabled'];
         // only try to call the remote if the configuration allows us
         if ($useremote) {
             $target = $this->config['remote']['host'];
@@ -81,7 +81,7 @@ class ImportWebConnectCursussenService
         $url = $this->config['remote']['host'] . $this->config['remote']['uri'];
 
         $options['headers'] = $this->headers;
-        $options['query'] = $this->config['remote']['get_courses'];
+        $options['query'] = $this->config['remote']['get_courses']['query'];
 
         try {
             $this->results = $this->client->request('GET', $url, $options)->getBody();
@@ -113,8 +113,8 @@ class ImportWebConnectCursussenService
     public function depublishAllCursussen()
     {
       $tablename = $this->cursussenRepository->getTableName();
-      $active = $this->config['target']['active'];
-      $inactive = $this->config['target']['inactive'];
+      $active = $this->config['remote']['get_courses']['target']['active'];
+      $inactive = $this->config['remote']['get_courses']['target']['inactive'];
       if ($active !== $inactive) {
         return $this->depublishSaveAllCursussen(
           [
@@ -190,16 +190,9 @@ class ImportWebConnectCursussenService
         if(!$cursusRecord) {
             $cursusRecord = new Content();
             $cursusRecord->datepublish = new DateTime();
-            $cursusRecord->ownerid = $this->config['target']['ownerid'];
+            $cursusRecord->ownerid = $this->config['remote']['get_courses']['target']['ownerid'];
             $message = 'Cursus: %s was inserted (%d - %d)';
         }
-
-        // if($studiepunten > 0) {
-        //     $cursusRecord->status = $this->config['target']['active'];
-        // } else {
-        //     $cursusRecord->status = $this->config['target']['inactive'];
-        // }
-
 
         $cursusRecord->naam = isset($cursus->naam_cursus) ? $cursus->naam_cursus : '' ;
         // $cursusRecord->academie = $cursus->academie; Not in resulset from WebConnect
@@ -210,8 +203,14 @@ class ImportWebConnectCursussenService
         // $cursusRecord->show_as_new = $cursus->show_as_new Not in resulset from WebConnect
         // $cursusRecord->comment = $cursus->comment Not in resulset from WebConnect
         // $cursusRecord->docent = isset($cursus->docent) ? $cursus->docent : ''; TODO: waiting for answer which docent goes in this field
-        $cursusRecord->body = isset($cursus->informatie['inhoud']) ? $cursus->informatie['inhoud'] : '';
-        $cursusRecord->goals = isset($cursus->goals) ? $cursus->goals : '';
+        if(isset($cursus->informatie) && count($cursus->informatie) >=1) {
+            $cursusbody = array_shift($cursus->informatie);
+            $cursusRecord->body = isset($cursusbody['inhoud']) ? $cursusbody['inhoud'] : '';
+        }
+        if(isset($cursus->informatie) && count($cursus->informatie) >=1) {
+            $cursusgoals = array_shift($cursus->informatie);
+            $cursusRecord->goals = isset($cursusgoals['inhoud']) ? $cursusgoals['inhoud'] : '';
+        }
         $cursusRecord->cost = isset($cursus->prijzen) ? $this->parsePrices($cursus->prijzen) : '';
         // $cursusRecord->length = $cursus->length Not in resulset from WebConnect
         // $cursusRecord->targetaudience = isset($cursus->targetaudience) ? $cursus->targetaudience : ''; Not in resulset from WebConnect
@@ -237,7 +236,7 @@ class ImportWebConnectCursussenService
         // $cursusRecord->projectcode = isset($cursus->projectcode) ? $this->parsePrices($cursus->projectcode) : ''; Not in resulset from WebConnect
         // $cursusRecord->notities = $cursus->notities Not in resulset from WebConnect
         $cursusRecord->slug = $this->app['slugify']->slugify($cursus->naam_cursus);
-        $cursusRecord->status = 'published';
+        $cursusRecord->status = $this->config['remote']['get_courses']['target']['active'];
 
         $this->cursussenRepository->save($cursusRecord);
 
@@ -287,30 +286,44 @@ class ImportWebConnectCursussenService
     {
         $this->depublishAllPlanningenByCursus($cursus->uitvoering_id);
         foreach($cursus->rooster as $planning) {
-            // echo '<p>saving cursusplanning '.$planning->start_tijd .' for '. $cursus->uitvoering_id . '</p>';
-            $planrecord = new Content();
-            $planrecord->datepublish = new DateTime();
-            $planrecord->ownerid = $this->config['target']['ownerid'];
-            $planrecord->status = 'published';
-            $planrecord->onderwerp = $planning->naam;
-            $planrecord->slug = $this->app['slugify']->slugify($planning->naam);
-            $startdate = date("Y-m-d H:i:s", strtotime($planning->datum . ' ' . $planning->start_tijd));
-            if ($startdate < "1000-01-01 00:00:00") {
-                $startdate = "0000-00-00 00:00:00";
+            $planrecord = $this->planningenRepository->findOneBy(['rooster_id' => $planning->rooster_id, 'cursus_id' => $cursus->uitvoering_id]);
+
+            if(!$planrecord) {
+                // echo '<p>saving cursusplanning '.$planning->start_tijd .' for '. $cursus->uitvoering_id . '</p>';
+                $planrecord = new Content();
+                $planrecord->datepublish = new DateTime();
+                $planrecord->ownerid = $this->config['remote']['get_courses']['target']['ownerid'];
+                $planrecord->status = 'published';
+                $planrecord->onderwerp = $planning->naam;
+                $planrecord->slug = $this->app['slugify']->slugify($planning->naam);
+                $startdate = date("Y-m-d H:i:s", strtotime($planning->datum . ' ' . $planning->start_tijd));
+                $planrecord->start_date = $startdate;
+                $enddate = date("Y-m-d H:i:s", strtotime($planning->datum . ' ' . $planning->eind_tijd));
+                $planrecord->end_date = $enddate;
+                $planrecord->cursus_id = $cursus->uitvoering_id;
+                $planrecord->rooster_id = $planning->rooster_id;
+                $planrecord->locatie = $planning->locatie;
+                $docentenIds = [];
+                foreach($planning->docenten as $docent) {
+                    array_push($docentenIds, $docent->id);
+                }
+                $planrecord->docent = join(',', $docentenIds); //Comma separeted list of IDs
+
+            } elseif( $this->config['save_only'] == false ) {
+                $planrecord->ownerid = $this->config['remote']['get_courses']['target']['ownerid'];
+                $planrecord->status = 'published';
+                $planrecord->onderwerp = $planning->naam;
+                $startdate = date("Y-m-d H:i:s", strtotime($planning->datum . ' ' . $planning->start_tijd));
+                $planrecord->start_date = $startdate;
+                $enddate = date("Y-m-d H:i:s", strtotime($planning->datum . ' ' . $planning->eind_tijd));
+                $planrecord->end_date = $enddate;
+                $planrecord->locatie = $planning->locatie;
+                $docentenIds = [];
+                foreach($planning->docenten as $docent) {
+                    array_push($docentenIds, $docent->id);
+                }
+                $planrecord->docent = join(',', $docentenIds); //Comma separeted list of IDs
             }
-            $planrecord->start_date = $startdate;
-            $enddate = date("Y-m-d H:i:s", strtotime($planning->datum . ' ' . $planning->eind_tijd));
-            if ($enddate < "1000-01-01 00:00:00") {
-                $enddate = "0000-00-00 00:00:00";
-            }
-            $planrecord->end_date = $enddate;
-            $planrecord->cursus_id = $cursus->uitvoering_id;
-            $planrecord->locatie = $planning->locatie;
-            $docentenIds = [];
-            foreach($planning->docenten as $docent) {
-                array_push($docentenIds, $docent->id);
-            }
-            $planrecord->docent = join(',', $docentenIds); //Comma separeted list of IDs
 
             $this->planningenRepository->save($planrecord);
         }
@@ -334,13 +347,13 @@ class ImportWebConnectCursussenService
             $docentRecord = new Content();
             $docentRecord->datepublish = new DateTime();
             $docentRecord->datecreated = new DateTime();
-            $docentRecord->ownerid = $this->config['target']['ownerid'];
+            $docentRecord->ownerid = $this->config['remote']['get_courses']['target']['ownerid'];
             $docentRecord->slug = $this->app['slugify']->slugify($docent->naam_docent);
             $docentRecord->docent_id = $docent->docent_id;
             $docentRecord->naam_docent = $docent->naam_docent;
             $docentRecord->functie = $docent->functie;
             $docentRecord->naam_bedrijf = $docent->naam_bedrijf;
-        } elseif($this->config['save_only'] == false && !empty($docentRecord)) {
+        } elseif($this->config['save_only'] == false) {
             $docentRecord->datechanged = new DateTime();
             $docentRecord->naam_docent = $docent->naam_docent;
             $docentRecord->functie = $docent->functie;
