@@ -72,6 +72,7 @@ class ImportWebConnectExtension extends SimpleExtension
     {
         return [
             new Nut\ImportWebConnectCommand($container),
+            new Nut\ImportWebConnectEventsCommand($container),
         ];
     }
 
