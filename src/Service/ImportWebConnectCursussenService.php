@@ -294,12 +294,12 @@ class ImportWebConnectCursussenService
             $planrecord->status = 'published';
             $planrecord->onderwerp = $planning->naam;
             $planrecord->slug = $this->app['slugify']->slugify($planning->naam);
-            $startdate = date("Y-m-d H:i:s", strtotime($planning->start_tijd));
+            $startdate = date("Y-m-d H:i:s", strtotime($planning->datum . ' ' . $planning->start_tijd));
             if ($startdate < "1000-01-01 00:00:00") {
                 $startdate = "0000-00-00 00:00:00";
             }
             $planrecord->start_date = $startdate;
-            $enddate = date("Y-m-d H:i:s", strtotime($planning->eind_tijd));
+            $enddate = date("Y-m-d H:i:s", strtotime($planning->datum . ' ' . $planning->eind_tijd));
             if ($enddate < "1000-01-01 00:00:00") {
                 $enddate = "0000-00-00 00:00:00";
             }
