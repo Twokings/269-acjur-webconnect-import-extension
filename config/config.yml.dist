@@ -12,16 +12,25 @@ remote:
     headers:
         'Content-type': 'application/json'
     get_courses:
-        'u': 'set this in local config'
-        'p': 'set this in local config'
-        'm': 'get_cursusuitvoeringen'
+        enabled: true
+        query:
+            'u': 'set this in local config'
+            'p': 'set this in local config'
+            'm': 'get_cursusuitvoeringen'
+        target:
+            contenttype: cursussen
+            ownerid: 3
+            inactive: published
     get_events:
-        'u': 'set this in local config'
-        'p': 'set this in local config'
-        'm': 'get_events'
-target:
-    contenttype: cursussen
-    ownerid: 3
+        enabled: true
+        query:
+            'u': 'set this in local config'
+            'p': 'set this in local config'
+            'm': 'get_events'
+        target:
+            contenttype: events
+            ownerid: 3
+            inactive: published
 
 # This option will update the Docenten contenttype when set to false and only save
 # Docenten when set to true.
