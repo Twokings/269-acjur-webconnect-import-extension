@@ -11,7 +11,7 @@ use \DateTime;
  *
  * @author Néstor de Dios Fernández <nestor@twokings.nl>
  */
-class ImportWebConnectService
+class ImportWebConnectCursussenService
 {
     private $app;
     private $config;

@@ -4,7 +4,7 @@ namespace Bolt\Extension\TwoKings\ImportWebConnect\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
-use Bolt\Extension\TwoKings\ImportWebConnect\Service\ImportWebConnectService;
+use Bolt\Extension\TwoKings\ImportWebConnect\Service\ImportWebConnectCursussenService;
 use Bolt\Extension\TwoKings\ImportWebConnect\Service\ImportWebConnectEventsService;
 
 /**
@@ -38,9 +38,9 @@ class ImportWebConnectProvider implements ServiceProviderInterface
             }
         );
 
-        $app['importwebconnect.service'] = $app->share(
+        $app['importwebconnect.cursussen.service'] = $app->share(
             function (Application $app) {
-                return new ImportWebConnectService(
+                return new ImportWebConnectCursussenService(
                      $app,
                      $app['guzzle.client'],
                      $app['logger.system']

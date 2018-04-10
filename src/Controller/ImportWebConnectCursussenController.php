@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @author Néstor de Dios Fernández <nestor@twokings.nl>
  */
-class ImportWebConnectController extends Base
+class ImportWebConnectCursussenController extends Base
 {
     /**
      * {@inheritdoc}
@@ -51,7 +51,7 @@ class ImportWebConnectController extends Base
      */
     public function importwebconnectBackendPage(Request $request)
     {
-        $results = $this->app['importwebconnect.service']->fetchData();
+        $results = $this->app['importwebconnect.cursussen.service']->fetchData();
 
         $messages = [];
 
@@ -61,10 +61,10 @@ class ImportWebConnectController extends Base
 
             $messages[] = $message;
             $number_of_cursussen = 0;
-            $this->app['importwebconnect.service']->depublishAllCursussen();
+            $this->app['importwebconnect.cursussen.service']->depublishAllCursussen();
 
             foreach($results->result as $cursus) {
-                $messages[] = $this->app['importwebconnect.service']->saveCursus($cursus);
+                $messages[] = $this->app['importwebconnect.cursussen.service']->saveCursus($cursus);
                 $number_of_cursussen++;
             }
 
