@@ -60,7 +60,8 @@ class ImportWebConnectExtension extends SimpleExtension
     protected function registerBackendControllers()
     {
         return [
-            '/' => new Controller\ImportWebConnectController(),
+            '/extensions/importwebconnect/cursussen' => new Controller\ImportWebConnectController(),
+            '/extensions/importwebconnect/events' => new Controller\ImportWebConnectEventsController(),
         ];
     }
 
@@ -120,7 +121,8 @@ class ImportWebConnectExtension extends SimpleExtension
                 'active' => 'published',
                 'inactive' => 'held',
                 'planningcontenttype' => 'planningen',
-                'docentencontenttype' => 'docenten'
+                'docentencontenttype' => 'docenten',
+                'eventscontenttype' => 'events'
             ]
         ];
     }

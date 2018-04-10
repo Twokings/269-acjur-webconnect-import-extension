@@ -21,9 +21,9 @@ class ImportWebConnectController extends Base
     public function addRoutes(ControllerCollection $ctr)
     {
         $ctr
-            ->match('/extensions/importwebconnect', [$this, 'importwebconnectBackendPage'])
+            ->match('/', [$this, 'importwebconnectBackendPage'])
             ->before([$this, 'before'])
-            ->bind('webconnect.import.get');
+            ->bind('webconnect.importcursussen.get');
 
         return $ctr;
     }
@@ -75,7 +75,7 @@ class ImportWebConnectController extends Base
         }
 
 
-        $html = $this->render('@importwebconnect/import_webconnect_backend.twig', [
+        $html = $this->render('@importwebconnect/import_webconnect_cursussen.twig', [
             'title'  => 'Import WebConnect',
             'results' => $results,
             'messages' => $messages
