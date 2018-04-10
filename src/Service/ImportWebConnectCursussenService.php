@@ -183,68 +183,68 @@ class ImportWebConnectCursussenService
      */
     private function insertCursus($cursus)
     {
-        $record = $this->cursussenRepository->findOneBy(['cursusid' => $cursus->cursus_id]);
+        $cursusRecord = $this->cursussenRepository->findOneBy(['cursusid' => $cursus->cursus_id]);
         $message = 'Cursus: %s was updated (%d - %d)';
 
         // no record found - prepare a blank one
         if(!$record) {
-            $record = new Content();
-            $record->datepublish = new DateTime();
-            $record->ownerid = $this->config['target']['ownerid'];
+            $cursusRecord = new Content();
+            $cursusRecord->datepublish = new DateTime();
+            $cursusRecord->ownerid = $this->config['target']['ownerid'];
             $message = 'Cursus: %s was inserted (%d - %d)';
         }
 
         // if($studiepunten > 0) {
-        //     $record->status = $this->config['target']['active'];
+        //     $cursusRecord->status = $this->config['target']['active'];
         // } else {
-        //     $record->status = $this->config['target']['inactive'];
+        //     $cursusRecord->status = $this->config['target']['inactive'];
         // }
 
 
-        $record->naam = isset($cursus->naam_cursus) ? $cursus->naam_cursus : '' ;
-        // $record->academie = $cursus->academie; Not in resulset from WebConnect
-        $record->theme = isset($cursus->themas) ? implode(', ', $cursus->themas) : '';
-        // $record->level = isset($cursus->level) ? $cursus->level : ''; Not in resulset from WebConnect
-        $record->pwo = isset($cursus->pwo_punten) ? $cursus->pwo_punten : '';
-        $record->new = isset($cursus->notitie) ? $cursus->notitie : '';
-        // $record->show_as_new = $cursus->show_as_new Not in resulset from WebConnect
-        // $record->comment = $cursus->comment Not in resulset from WebConnect
-        // $record->docent = isset($cursus->docent) ? $cursus->docent : ''; TODO: waiting for answer which docent goes in this field
-        $record->body = isset($cursus->informatie['inhoud']) ? $cursus->informatie['inhoud'] : '';
-        $record->goals = isset($cursus->goals) ? $cursus->goals : '';
-        $record->cost = isset($cursus->prijzen) ? $this->parsePrices($cursus->prijzen) : '';
-        // $record->length = $cursus->length Not in resulset from WebConnect
-        // $record->targetaudience = isset($cursus->targetaudience) ? $cursus->targetaudience : ''; Not in resulset from WebConnect
-        // $record->uitgelicht = $cursus->uitgelicht Not in resulset from WebConnect
-        // $record->uitgelichttext = $cursus->uitgelichttext Not in resulset from WebConnect
+        $cursusRecord->naam = isset($cursus->naam_cursus) ? $cursus->naam_cursus : '' ;
+        // $cursusRecord->academie = $cursus->academie; Not in resulset from WebConnect
+        $cursusRecord->theme = isset($cursus->themas) ? implode(', ', $cursus->themas) : '';
+        // $cursusRecord->level = isset($cursus->level) ? $cursus->level : ''; Not in resulset from WebConnect
+        $cursusRecord->pwo = isset($cursus->pwo_punten) ? $cursus->pwo_punten : '';
+        $cursusRecord->new = isset($cursus->notitie) ? $cursus->notitie : '';
+        // $cursusRecord->show_as_new = $cursus->show_as_new Not in resulset from WebConnect
+        // $cursusRecord->comment = $cursus->comment Not in resulset from WebConnect
+        // $cursusRecord->docent = isset($cursus->docent) ? $cursus->docent : ''; TODO: waiting for answer which docent goes in this field
+        $cursusRecord->body = isset($cursus->informatie['inhoud']) ? $cursus->informatie['inhoud'] : '';
+        $cursusRecord->goals = isset($cursus->goals) ? $cursus->goals : '';
+        $cursusRecord->cost = isset($cursus->prijzen) ? $this->parsePrices($cursus->prijzen) : '';
+        // $cursusRecord->length = $cursus->length Not in resulset from WebConnect
+        // $cursusRecord->targetaudience = isset($cursus->targetaudience) ? $cursus->targetaudience : ''; Not in resulset from WebConnect
+        // $cursusRecord->uitgelicht = $cursus->uitgelicht Not in resulset from WebConnect
+        // $cursusRecord->uitgelichttext = $cursus->uitgelichttext Not in resulset from WebConnect
 
         if($cursus->aantal_deelnemers == $cursus->max_deelnemers) {
-            $record->inschrijven_mogelijk = 1; //TODO check for this option to be checked
+            $cursusRecord->inschrijven_mogelijk = 1; //TODO check for this option to be checked
         } else {
-            $record->inschrijven_mogelijk = 0;
+            $cursusRecord->inschrijven_mogelijk = 0;
         }
 
-        // $record->formulier = $cursus->formulier Not in resulset from WebConnect
-        $record->start_date = isset($cursus->start_datum) ? $cursus->start_datum : '';
-        $record->end_date = isset($cursus->eind_datum) ? $cursus->eind_datum : '';
-        // $record->estimate_date = $cursus->estimate_date Not in resulset from WebConnect
-        // $record->dates = isset($cursus->dates) ? $this->parsePrices($cursus->dates) : ''; Not in resulset from WebConnect
-        // $record->newdate = $cursus->newdate Not in resulset from WebConnect
-        // $record->review = isset($cursus->review) ? $this->parsePrices($cursus->review) : ''; Not in resulset from WebConnect
-        // $record->review_image = $cursus->review_image Not in resulset from WebConnect
-        // $record->searchname = isset($cursus->searchname) ? $this->parsePrices($cursus->searchname) : ''; Not in resulset from WebConnect
-        $record->cursusid = isset($cursus->cursus_id) ? $cursus->cursus_id : '';
-        // $record->projectcode = isset($cursus->projectcode) ? $this->parsePrices($cursus->projectcode) : ''; Not in resulset from WebConnect
-        // $record->notities = $cursus->notities Not in resulset from WebConnect
-        $record->slug = $this->app['slugify']->slugify($cursus->naam_cursus);
-        $record->status = 'published';
+        // $cursusRecord->formulier = $cursus->formulier Not in resulset from WebConnect
+        $cursusRecord->start_date = isset($cursus->start_datum) ? $cursus->start_datum : '';
+        $cursusRecord->end_date = isset($cursus->eind_datum) ? $cursus->eind_datum : '';
+        // $cursusRecord->estimate_date = $cursus->estimate_date Not in resulset from WebConnect
+        // $cursusRecord->dates = isset($cursus->dates) ? $this->parsePrices($cursus->dates) : ''; Not in resulset from WebConnect
+        // $cursusRecord->newdate = $cursus->newdate Not in resulset from WebConnect
+        // $cursusRecord->review = isset($cursus->review) ? $this->parsePrices($cursus->review) : ''; Not in resulset from WebConnect
+        // $cursusRecord->review_image = $cursus->review_image Not in resulset from WebConnect
+        // $cursusRecord->searchname = isset($cursus->searchname) ? $this->parsePrices($cursus->searchname) : ''; Not in resulset from WebConnect
+        $cursusRecord->cursusid = isset($cursus->cursus_id) ? $cursus->cursus_id : '';
+        // $cursusRecord->projectcode = isset($cursus->projectcode) ? $this->parsePrices($cursus->projectcode) : ''; Not in resulset from WebConnect
+        // $cursusRecord->notities = $cursus->notities Not in resulset from WebConnect
+        $cursusRecord->slug = $this->app['slugify']->slugify($cursus->naam_cursus);
+        $cursusRecord->status = 'published';
 
-        $this->cursussenRepository->save($record);
+        $this->cursussenRepository->save($cursusRecord);
 
         if (!empty($cursus->rooster) && count($cursus->rooster) >= 1) {
             $count = count($cursus->rooster);
-            echo '<p>saving ' . $count . ' cursusplanningen for '. $record->id . "- $record->naam" . '</p>';
-            $this->savePlanningen($cursus, $record);
+            echo '<p>saving ' . $count . ' cursusplanningen for '. $cursusRecord->id . "- $cursusRecord->naam" . '</p>';
+            $this->savePlanningen($cursus, $cursusRecord);
         }
 
         if (!empty($cursus->docent) && count($cursus->docent) >= 1) {
@@ -254,7 +254,7 @@ class ImportWebConnectCursussenService
             }
         }
 
-        $message = sprintf($message, $record->naam, $record->cursusid, $record->id);
+        $message = sprintf($message, $cursusRecord->naam, $cursusRecord->cursusid, $cursusRecord->id);
 
         return $message;
 
