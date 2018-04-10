@@ -1,0 +1,36 @@
+{% extends '_base/_page-nav.twig' %}
+
+{% block page_nav title %}
+
+{% block page_title __(title) %}
+
+{% block page_main %}
+
+    {% if messages is defined and messages is not empty %}
+        <ul>
+        {% for message in messages %}
+            {% if message is iterable %}
+                <li>{{ dump(message) }}</li>
+            {% else %}
+                <li>{{ message }}</li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if results is defined and results is not empty %}
+        <ul>
+        {% for result in results.result %}
+            {% setcontent existing = 'events' where { 'event_id': result.event_id, 'status': '!' } returnsingle %}
+            {% if existing %}
+                <li><a href="{{ existing.editlink() }}">{{ result.event_id }} - {{ result.naam_event }}</a></li>
+            {% else %}
+                <li>{{ result.event_id }} - {{ result.naam_event }}</li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+
+        <a class="btn btn-primary" href="?confirmed=looksgood">Import these records</a>
+    {% endif %}
+
+{% endblock page_main %}
