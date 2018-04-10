@@ -96,8 +96,26 @@ class ImportWebConnectEventsService
       $active = $this->config['remote']['get_events']['target']['active'];
       $inactive = $this->config['remote']['get_events']['target']['inactive'];
       if ($active !== $inactive) {
-        return $this->app['db']->prepare('TRUNCATE ' . $tablename )->execute();
+        return $this->depublishSaveAllEvents(
+            [
+              'table' => $tablename,
+              'field' => 'status',
+              'value' => $inactive
+            ]
+          );
       }
+    }
+
+    /**
+     * Set a field for all records
+     *
+     * Used to depublish all events before a new import with $this->depublishAllEvents()
+     *
+     * @param $newvalues
+     */
+    private function depublishSaveAllEvents($newvalues)
+    {
+      return $this->app['db']->prepare('UPDATE ' . $newvalues['table'] . ' SET ' . $newvalues['field'] . ' = "' . $newvalues['value'] . '"')->execute();
     }
 
     /**
@@ -133,9 +151,19 @@ class ImportWebConnectEventsService
         // $eventRecord->subtitle = isset($event->subtitle) ? $event->subtitle : ''; Not in resulset from WebConnect
         $eventRecord->date = isset($event->datum) ? $event->datum : '' ;
         $eventRecord->location = isset($event->locatie) ? $event->locatie : '' ;
-        $eventRecord->eventtype = isset($event->type_event) ? $event->type_event : '' ;
+        $eventRecord->eventtype = isset($event->type_event) ? strtolower($event->type_event) : '' ;
+        $eventRecord->additionele_info = isset($event->additionele_info) ? $event->additionele_info : '';
+        $eventRecord->doelgroep = isset($event->doelgroep) ? $event->doelgroep : '';
+        if(isset($eventRecord->informatie) && count($eventRecord->informatie) >=1) {
+            $eventbody = array_shift($cursus->informatie);
+            $eventRecord->body = isset($cursusbody['inhoud']) ? $cursusbody['inhoud'] : '';
+        }
+
+        $eventRecord->starttime = isset($event->start_tijd) ? $event->start_tijd : '';
+        $eventRecord->endtime = isset($event->eind_tijd) ? $event->eind_tijd : '';
         // $eventRecord->inschrijven_mogelijk = isset($event->inschrijven_mogelijk) ? $event->inschrijven_mogelijk : '' ; Not in resulset from WebConnect
-        // $eventRecord->body = isset($event->body) ? $event->body : ''; Not in resulset from WebConnect
+        $eventRecord->pwo_punten = isset($event->pwo_punten) ? $event->pwo_punten : '';
+        $eventRecord->subscribe_link = isset($event->subscribe_link) ? $event->subscribe_link : '';
         // $eventRecord->verslag = isset($event->verslag) ? $event->verslag : ''; Not in resulset from WebConnect
         $eventRecord->slug = $this->app['slugify']->slugify($event->naam_event);
         $eventRecord->status = 'published';
