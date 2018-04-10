@@ -187,7 +187,7 @@ class ImportWebConnectCursussenService
         $message = 'Cursus: %s was updated (%d - %d)';
 
         // no record found - prepare a blank one
-        if(!$record) {
+        if(!$cursusRecord) {
             $cursusRecord = new Content();
             $cursusRecord->datepublish = new DateTime();
             $cursusRecord->ownerid = $this->config['target']['ownerid'];
@@ -218,8 +218,8 @@ class ImportWebConnectCursussenService
         // $cursusRecord->uitgelicht = $cursus->uitgelicht Not in resulset from WebConnect
         // $cursusRecord->uitgelichttext = $cursus->uitgelichttext Not in resulset from WebConnect
 
-        if($cursus->aantal_deelnemers == $cursus->max_deelnemers) {
-            $cursusRecord->inschrijven_mogelijk = 1; //TODO check for this option to be checked
+        if($cursus->aantal_deelnemers >= $cursus->max_deelnemers) {
+            $cursusRecord->inschrijven_mogelijk = 1;
         } else {
             $cursusRecord->inschrijven_mogelijk = 0;
         }
