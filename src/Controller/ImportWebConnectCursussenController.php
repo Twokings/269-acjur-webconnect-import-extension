@@ -76,7 +76,7 @@ class ImportWebConnectCursussenController extends Base
 
 
         $html = $this->render('@importwebconnect/import_webconnect_cursussen.twig', [
-            'title'  => 'Import WebConnect',
+            'title'  => 'Import WebConnect Cursussen',
             'results' => $results,
             'messages' => $messages
         ], []);

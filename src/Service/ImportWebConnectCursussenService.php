@@ -243,8 +243,8 @@ class ImportWebConnectCursussenService
 
         if (!empty($cursus->rooster) && count($cursus->rooster) >= 1) {
             $count = count($cursus->rooster);
-            echo '<p>saving ' . $count . ' cursusplanningen for '. $cursusRecord->id . "- $cursusRecord->naam" . '</p>';
-            $this->savePlanningen($cursus, $cursusRecord);
+            // echo '<p>saving ' . $count . ' cursusplanningen for '. $cursusRecord->id . "- $cursusRecord->naam" . '</p>';
+            $this->savePlanningen($cursus);
         }
 
         if (!empty($cursus->docent) && count($cursus->docent) >= 1) {
@@ -278,22 +278,20 @@ class ImportWebConnectCursussenService
     /**
      * Save Related planning
      *
-     * This part removes all planningen for a given cursus ($record->id) before inserting the new ones
-     * It also uses $record->id, not $record->cursusid to link planningen to cursussen
+     * This part removes all planningen for a given cursus ($cursus->uitvoering_id) before inserting the new ones
      *
      * @param $cursus
      * @param $record
      */
-    private function savePlanningen($cursus, $record)
+    private function savePlanningen($cursus)
     {
-        $this->depublishAllPlanningenByCursus($record->id);
+        $this->depublishAllPlanningenByCursus($cursus->uitvoering_id);
         foreach($cursus->rooster as $planning) {
-            // echo '<p>saving cursusplanning '.$planning->start_tijd .' for '. $record->id . '</p>';
+            // echo '<p>saving cursusplanning '.$planning->start_tijd .' for '. $cursus->uitvoering_id . '</p>';
             $planrecord = new Content();
             $planrecord->datepublish = new DateTime();
             $planrecord->ownerid = $this->config['target']['ownerid'];
             $planrecord->status = 'published';
-            $planrecord->cursus_id = $record->id;
             $planrecord->onderwerp = $planning->naam;
             $planrecord->slug = $this->app['slugify']->slugify($planning->naam);
             $startdate = date("Y-m-d H:i:s", strtotime($planning->start_tijd));
