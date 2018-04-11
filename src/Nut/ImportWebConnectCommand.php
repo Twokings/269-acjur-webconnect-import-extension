@@ -33,7 +33,7 @@ class ImportWebConnectCommand extends BaseCommand
   {
     $messages = [];
 
-    $results = $this->app['importwebconnect.service']->fetchData();
+    $results = $this->app['importwebconnect.cursussen.service']->fetchData();
 
     $message = 'Starting WebConnect import';
     if ($input->getOption('log')) {
@@ -41,12 +41,12 @@ class ImportWebConnectCommand extends BaseCommand
     }
     $this->app['logger.system']->info($message, ['event' => 'import']);
 
-    $this->app['importwebconnect.service']->depublishAllCursussen();
+    $this->app['importwebconnect.cursussen.service']->depublishAllCursussen();
 
     $number_of_cursussen = 0;
 
     foreach($results->result as $cursus) {
-        $message = $this->app['importwebconnect.service']->saveCursus($cursus);
+        $message = $this->app['importwebconnect.cursussen.service']->saveCursus($cursus);
 
         if ($input->getOption('log')) {
           $output->writeln($message);
