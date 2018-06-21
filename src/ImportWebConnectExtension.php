@@ -60,8 +60,9 @@ class ImportWebConnectExtension extends SimpleExtension
     protected function registerBackendControllers()
     {
         return [
+            '/extensions/importwebconnect'           => new Controller\ImportWebConnectController(),
             '/extensions/importwebconnect/cursussen' => new Controller\ImportWebConnectCursussenController(),
-            '/extensions/importwebconnect/events' => new Controller\ImportWebConnectEventsController(),
+            '/extensions/importwebconnect/events'    => new Controller\ImportWebConnectEventsController(),
         ];
     }
 
