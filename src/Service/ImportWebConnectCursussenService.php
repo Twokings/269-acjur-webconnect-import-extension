@@ -60,6 +60,16 @@ class ImportWebConnectCursussenService
             $this->app['logger.system']->error('No available source to import.', ['event' => 'import']);
             return false;
         }
+// dump($this->results);
+        foreach ($this->results->result as $result) {
+            # code...
+
+            // dump($result); die();
+            if(!is_string($result) && property_exists($result, 'informatie') && is_array($result->informatie)){
+
+                // dump($result);
+            }
+        }
 
         return $this->results;
 
@@ -203,14 +213,24 @@ class ImportWebConnectCursussenService
         // $cursusRecord->show_as_new = $cursus->show_as_new Not in resulset from WebConnect
         // $cursusRecord->comment = $cursus->comment Not in resulset from WebConnect
         // $cursusRecord->docent = isset($cursus->docent) ? $cursus->docent : ''; TODO: waiting for answer which docent goes in this field
+
         if(isset($cursus->informatie) && count($cursus->informatie) >=1) {
-            $cursusbody = array_shift($cursus->informatie);
-            $cursusRecord->body = isset($cursusbody['inhoud']) ? $cursusbody['inhoud'] : '';
+
+                $cursusbody = '';
+                $cursusgoals = '';
+                foreach ($cursus->informatie as $info) {
+                    if($info->titel == "Inhoud") {
+                        $cursusbody .= $info->inhoud;
+                    } elseif($info->titel == "Resultaat") {
+                        $cursusgoals .= $info->inhoud;
+                    } else {
+                        $cursusbody .= $info->inhoud;
+                    }
+                }
+                $cursusRecord->body = $cursusbody;
+                $cursusRecord->goals = $cursusgoals;
         }
-        if(isset($cursus->informatie) && count($cursus->informatie) >=1) {
-            $cursusgoals = array_shift($cursus->informatie);
-            $cursusRecord->goals = isset($cursusgoals['inhoud']) ? $cursusgoals['inhoud'] : '';
-        }
+
         $cursusRecord->cost = isset($cursus->prijzen) ? $this->parsePrices($cursus->prijzen) : '';
         // $cursusRecord->length = $cursus->length Not in resulset from WebConnect
         // $cursusRecord->targetaudience = isset($cursus->targetaudience) ? $cursus->targetaudience : ''; Not in resulset from WebConnect
