@@ -137,7 +137,6 @@ class ImportWebConnectEventsService
     {
         $eventRecord = $this->eventsRepository->findOneBy(['event_id' => $event->event_id]);
         $message = 'Event: %s was updated (%d - %d)';
-
         // no record found - prepare a blank one
         if(!$eventRecord) {
             $eventRecord = new Content();
@@ -154,9 +153,13 @@ class ImportWebConnectEventsService
         $eventRecord->eventtype = isset($event->type_event) ? strtolower($event->type_event) : '' ;
         $eventRecord->additionele_info = isset($event->additionele_info) ? $event->additionele_info : '';
         $eventRecord->doelgroep = isset($event->doelgroep) ? $event->doelgroep : '';
-        if(isset($eventRecord->informatie) && count($eventRecord->informatie) >=1) {
-            $eventbody = array_shift($cursus->informatie);
-            $eventRecord->body = isset($cursusbody['inhoud']) ? $cursusbody['inhoud'] : '';
+
+        if(isset($event->informatie) && count($event->informatie) >=1) {
+
+            $eventbody = '';
+            foreach ($event->informatie as $info) {
+                $eventbody .= $info->inhoud;
+            }
         }
 
         $eventRecord->starttime = isset($event->start_tijd) ? $event->start_tijd : '';
