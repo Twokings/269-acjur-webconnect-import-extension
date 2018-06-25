@@ -144,7 +144,6 @@ class ImportWebConnectEventsService
             $eventRecord->ownerid = $this->config['remote']['get_events']['target']['ownerid'];
             $message = 'Event: %s was inserted (%d - %d)';
         }
-
         $eventRecord->event_id = isset($event->event_id) ? $event->event_id : '' ;
         $eventRecord->title = isset($event->naam_event) ? $event->naam_event : '' ;
         // $eventRecord->subtitle = isset($event->subtitle) ? $event->subtitle : ''; Not in resulset from WebConnect
@@ -160,8 +159,9 @@ class ImportWebConnectEventsService
             foreach ($event->informatie as $info) {
                 $eventbody .= $info->inhoud;
             }
-        }
 
+            $eventRecord->body = $eventbody;
+        }
         $eventRecord->starttime = isset($event->start_tijd) ? $event->start_tijd : '';
         $eventRecord->endtime = isset($event->eind_tijd) ? $event->eind_tijd : '';
         // $eventRecord->inschrijven_mogelijk = isset($event->inschrijven_mogelijk) ? $event->inschrijven_mogelijk : '' ; Not in resulset from WebConnect
