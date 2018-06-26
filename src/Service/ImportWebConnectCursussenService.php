@@ -243,6 +243,9 @@ class ImportWebConnectCursussenService
             $cursusRecord->inschrijven_mogelijk = 0;
         }
 
+        // link is a reserved name, so rewrite it to inschrijf_link
+        $cursusRecord->inschrijf_link = isset($cursus->link) ? $cursus->link : '' ;
+
         // $cursusRecord->formulier = $cursus->formulier Not in resulset from WebConnect
         $cursusRecord->start_date = isset($cursus->start_datum) ? $cursus->start_datum : '';
         $cursusRecord->end_date = isset($cursus->eind_datum) ? $cursus->eind_datum : '';
