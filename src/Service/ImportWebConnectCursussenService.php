@@ -96,9 +96,11 @@ class ImportWebConnectCursussenService
         try {
             $this->results = $this->client->request('GET', $url, $options)->getBody();
             $this->results = json_decode($this->results);
+            $this->app['logger.system']->error('Imported: '. $url, ['event' => 'import']);
         } catch (\Exception $e) {
             $this->errormessage = 'Error occurred during fetch of remote import source: ' . $e->getMessage();
             $this->app['logger.system']->error($this->errormessage, ['event' => 'import']);
+            $this->app['logger.system']->error('Failed: '. $url, ['event' => 'import']);
             // return something empty
             $this->results = false;
         }
