@@ -36,6 +36,7 @@ class ImportWebConnectCursussenService
         $this->app = $app;
         $this->config = $app['importwebconnect.config'];
         $this->client = $client;
+        $this->logger = $this->app['logger.system'];
         $this->cursussenRepository = $this->app['storage']->getRepository($this->config['remote']['get_courses']['target']['contenttype']);
         $this->planningenRepository = $this->app['storage']->getRepository($this->config['remote']['get_courses']['target']['planningcontenttype']);
         $this->docentenRepository = $this->app['storage']->getRepository($this->config['remote']['get_courses']['target']['docentencontenttype']);
@@ -53,26 +54,17 @@ class ImportWebConnectCursussenService
         $useremote = $this->config['remote']['get_courses']['enabled'];
         // only try to call the remote if the configuration allows us
         if ($useremote) {
-            $target = $this->config['remote']['host'];
-            $this->app['logger.system']->info('Importing from remote source: ' . $target, ['event' => 'import']);
+            // If we import the webServiceCallRequest handles the logging
+            // $target = $this->config['remote']['host'];
+            // $this->logger->info('Importing from remote source: ' . $target, ['event' => 'import']);
             $this->webServiceCallRequest();
         } else {
-            $this->app['logger.system']->error('No available source to import.', ['event' => 'import']);
+            $this->logger->error('No available source to import.', ['event' => 'import']);
             return false;
         }
-// dump($this->results);
-        foreach ($this->results->result as $result) {
-            # code...
-
-            // dump($result); die();
-            if(!is_string($result) && property_exists($result, 'informatie') && is_array($result->informatie)){
-
-                // dump($result);
-            }
-        }
+        // dump($this->results);
 
         return $this->results;
-
     }
 
     /**
@@ -93,17 +85,22 @@ class ImportWebConnectCursussenService
         $options['headers'] = $this->headers;
         $options['query'] = $this->config['remote']['get_courses']['query'];
 
+        $message_url = $url . '?' . http_build_query($options['query']);
+
         try {
             $this->results = $this->client->request('GET', $url, $options)->getBody();
             $this->results = json_decode($this->results);
-            $this->app['logger.system']->error('Imported: '. $url, ['event' => 'import']);
+            $message = 'Imported from remote url: %s';
+            $this->app['logger.system']->info(sprintf($message, $message_url), ['event' => 'import']);
         } catch (\Exception $e) {
             $this->errormessage = 'Error occurred during fetch of remote import source: ' . $e->getMessage();
             $this->app['logger.system']->error($this->errormessage, ['event' => 'import']);
-            $this->app['logger.system']->error('Failed: '. $url, ['event' => 'import']);
+            $message = 'Failed to fetch remote url: %s';
+            $this->app['logger.system']->error(sprintf($message, $message_url), ['event' => 'import']);
             // return something empty
             $this->results = false;
         }
+
     }
 
     /**
@@ -207,37 +204,38 @@ class ImportWebConnectCursussenService
         }
 
         $cursusRecord->naam = isset($cursus->naam_cursus) ? $cursus->naam_cursus : '' ;
-        // $cursusRecord->academie = $cursus->academie; Not in resulset from WebConnect
         $cursusRecord->theme = isset($cursus->themas) ? implode(', ', $cursus->themas) : '';
-        // $cursusRecord->level = isset($cursus->level) ? $cursus->level : ''; Not in resulset from WebConnect
         $cursusRecord->pwo = isset($cursus->pwo_punten) ? $cursus->pwo_punten : '';
         $cursusRecord->new = isset($cursus->notitie) ? $cursus->notitie : '';
-        // $cursusRecord->show_as_new = $cursus->show_as_new Not in resulset from WebConnect
-        // $cursusRecord->comment = $cursus->comment Not in resulset from WebConnect
-        // $cursusRecord->docent = isset($cursus->docent) ? $cursus->docent : ''; TODO: waiting for answer which docent goes in this field
-
-        if(isset($cursus->informatie) && count($cursus->informatie) >=1) {
-
-                $cursusbody = '';
-                $cursusgoals = '';
-                foreach ($cursus->informatie as $info) {
-                    if($info->titel == "Inhoud") {
-                        $cursusbody .= $info->inhoud;
-                    } elseif($info->titel == "Resultaat") {
-                        $cursusgoals .= $info->inhoud;
-                    } else {
-                        $cursusbody .= $info->inhoud;
-                    }
-                }
-                $cursusRecord->body = $cursusbody;
-                $cursusRecord->goals = $cursusgoals;
-        }
-
         $cursusRecord->cost = isset($cursus->prijzen) ? $this->parsePrices($cursus->prijzen) : '';
-        // $cursusRecord->length = $cursus->length Not in resulset from WebConnect
-        // $cursusRecord->targetaudience = isset($cursus->targetaudience) ? $cursus->targetaudience : ''; Not in resulset from WebConnect
-        // $cursusRecord->uitgelicht = $cursus->uitgelicht Not in resulset from WebConnect
-        // $cursusRecord->uitgelichttext = $cursus->uitgelichttext Not in resulset from WebConnect
+
+        // link is a reserved name, so rewrite it to inschrijf_link
+        $cursusRecord->inschrijf_link = isset($cursus->link) ? $cursus->link : '' ;
+
+        $cursusRecord->start_date = isset($cursus->start_datum) ? $cursus->start_datum : '';
+        $cursusRecord->end_date = isset($cursus->eind_datum) ? $cursus->eind_datum : '';
+
+        // The unique identifier should be the uitvoering_id
+        $cursusRecord->cursusid = isset($cursus->uitvoering_id) ? $cursus->uitvoering_id : '';
+        $cursusRecord->slug = $this->app['slugify']->slugify($cursus->naam_cursus);
+        $cursusRecord->status = $this->config['remote']['get_courses']['target']['active'];
+
+        // Get special information blocks
+        if(isset($cursus->informatie) && count($cursus->informatie) >=1) {
+            $cursusbody = '';
+            $cursusgoals = '';
+            foreach ($cursus->informatie as $info) {
+                if($info->titel == "Inhoud") {
+                    $cursusbody .= $info->inhoud;
+                } elseif($info->titel == "Resultaat") {
+                    $cursusgoals .= $info->inhoud;
+                } else {
+                    $cursusbody .= $info->inhoud;
+                }
+            }
+            $cursusRecord->body = $cursusbody;
+            $cursusRecord->goals = $cursusgoals;
+        }
 
         if($cursus->aantal_deelnemers >= $cursus->max_deelnemers) {
             $cursusRecord->inschrijven_mogelijk = 1;
@@ -245,40 +243,43 @@ class ImportWebConnectCursussenService
             $cursusRecord->inschrijven_mogelijk = 0;
         }
 
-        // link is a reserved name, so rewrite it to inschrijf_link
-        $cursusRecord->inschrijf_link = isset($cursus->link) ? $cursus->link : '' ;
-
-        // $cursusRecord->formulier = $cursus->formulier Not in resulset from WebConnect
-        $cursusRecord->start_date = isset($cursus->start_datum) ? $cursus->start_datum : '';
-        $cursusRecord->end_date = isset($cursus->eind_datum) ? $cursus->eind_datum : '';
-        // $cursusRecord->estimate_date = $cursus->estimate_date Not in resulset from WebConnect
-        // $cursusRecord->dates = isset($cursus->dates) ? $this->parsePrices($cursus->dates) : ''; Not in resulset from WebConnect
-        // $cursusRecord->newdate = $cursus->newdate Not in resulset from WebConnect
-        // $cursusRecord->review = isset($cursus->review) ? $this->parsePrices($cursus->review) : ''; Not in resulset from WebConnect
-        // $cursusRecord->review_image = $cursus->review_image Not in resulset from WebConnect
-        // $cursusRecord->searchname = isset($cursus->searchname) ? $this->parsePrices($cursus->searchname) : ''; Not in resulset from WebConnect
-        $cursusRecord->cursusid = isset($cursus->uitvoering_id) ? $cursus->uitvoering_id : '';
-        // $cursusRecord->projectcode = isset($cursus->projectcode) ? $this->parsePrices($cursus->projectcode) : ''; Not in resulset from WebConnect
-        // $cursusRecord->notities = $cursus->notities Not in resulset from WebConnect
-        $cursusRecord->slug = $this->app['slugify']->slugify($cursus->naam_cursus);
-        $cursusRecord->status = $this->config['remote']['get_courses']['target']['active'];
+        // Not in resulset from WebConnect
+        // $cursusRecord->academie = $cursus->academie;
+        // $cursusRecord->level = isset($cursus->level) ? $cursus->level : '';
+        // $cursusRecord->show_as_new = $cursus->show_as_new;
+        // $cursusRecord->comment = $cursus->comment;
+        // $cursusRecord->docent = isset($cursus->docent) ? $cursus->docent : '';
+        // $cursusRecord->length = $cursus->length;
+        // $cursusRecord->targetaudience = isset($cursus->targetaudience) ? $cursus->targetaudience : '';
+        // $cursusRecord->uitgelicht = $cursus->uitgelicht;
+        // $cursusRecord->uitgelichttext = $cursus->uitgelichttext;
+        // $cursusRecord->formulier = $cursus->formulier;
+        // $cursusRecord->estimate_date = $cursus->estimate_date;
+        // $cursusRecord->dates = isset($cursus->dates) ? $this->parsePrices($cursus->dates) : '';
+        // $cursusRecord->newdate = $cursus->newdate;
+        // $cursusRecord->review = isset($cursus->review) ? $this->parsePrices($cursus->review) : '';
+        // $cursusRecord->review_image = $cursus->review_image;
+        // $cursusRecord->searchname = isset($cursus->searchname) ? $this->parsePrices($cursus->searchname) : '';
+        // $cursusRecord->projectcode = isset($cursus->projectcode) ? $this->parsePrices($cursus->projectcode) : '';
+        // $cursusRecord->notities = $cursus->notities;
 
         $this->cursussenRepository->save($cursusRecord);
 
+        // Save all related docenten in this cursusuitvoering
+        if (!empty($cursus->docent) && count($cursus->docent) >= 1) {
+          foreach ($cursus->docent as $docent) {
+            $this->saveDocent($docent);
+          }
+        }
+
+        // Save all related planningen in this cursusuitvoering
         if (!empty($cursus->rooster) && count($cursus->rooster) >= 1) {
-            $count = count($cursus->rooster);
-            // echo '<p>saving ' . $count . ' cursusplanningen for '. $cursusRecord->id . "- $cursusRecord->naam" . '</p>';
             $this->savePlanningen($cursus);
         }
 
-        if (!empty($cursus->docent) && count($cursus->docent) >= 1) {
-            $count = count($cursus->docent);
-            foreach ($cursus->docent as $docent) {
-                $this->saveDocent($docent);
-            }
-        }
 
         $message = sprintf($message, $cursusRecord->naam, $cursusRecord->cursusid, $cursusRecord->id);
+        $this->logger->info($message, ['event' => 'import']);
 
         return $message;
 
@@ -312,8 +313,11 @@ class ImportWebConnectCursussenService
         $this->depublishAllPlanningenByCursus($cursus->uitvoering_id);
         foreach($cursus->rooster as $planning) {
             $planrecord = $this->planningenRepository->findOneBy(['rooster_id' => $planning->rooster_id, 'cursus_id' => $cursus->uitvoering_id]);
+            $message = 'Planning: %s / %s was updated (%d)';
 
             if(!$planrecord) {
+                $message = 'Planning: %s / %s was inserted (%d)';
+
                 // echo '<p>saving cursusplanning '.$planning->start_tijd .' for '. $cursus->uitvoering_id . '</p>';
                 $planrecord = new Content();
                 $planrecord->datepublish = new DateTime();
@@ -351,6 +355,9 @@ class ImportWebConnectCursussenService
             }
 
             $this->planningenRepository->save($planrecord);
+
+            $message = sprintf($message, $planrecord->start_date, $planrecord->onderwerp, $planrecord->cursus_id);
+            $this->logger->info($message, ['event' => 'import']);
         }
     }
 
@@ -367,8 +374,10 @@ class ImportWebConnectCursussenService
     {
         $docentRecord = $this->docentenRepository->findOneBy(['docent_id' => $docent->docent_id]);
 
+        $message = 'Docent: %s was updated (%d)';
+
         if(!$docentRecord) {
-            $message = 'Docent: %s was inserted (%d - %d)';
+            $message = 'Docent: %s was inserted (%d)';
             $docentRecord = new Content();
             $docentRecord->datepublish = new DateTime();
             $docentRecord->datecreated = new DateTime();
@@ -389,6 +398,8 @@ class ImportWebConnectCursussenService
 
         $this->docentenRepository->save($docentRecord);
 
+        $message = sprintf($message, $docentRecord->naam_docent, $docent->docent_id);
+        $this->logger->info($message, ['event' => 'import']);
     }
 
 }
