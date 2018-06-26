@@ -195,7 +195,7 @@ class ImportWebConnectCursussenService
      */
     private function insertCursus($cursus)
     {
-        $cursusRecord = $this->cursussenRepository->findOneBy(['cursusid' => $cursus->cursus_id]);
+        $cursusRecord = $this->cursussenRepository->findOneBy(['cursusid' => $cursus->uitvoering_id]);
         $message = 'Cursus: %s was updated (%d - %d)';
 
         // no record found - prepare a blank one
@@ -257,7 +257,7 @@ class ImportWebConnectCursussenService
         // $cursusRecord->review = isset($cursus->review) ? $this->parsePrices($cursus->review) : ''; Not in resulset from WebConnect
         // $cursusRecord->review_image = $cursus->review_image Not in resulset from WebConnect
         // $cursusRecord->searchname = isset($cursus->searchname) ? $this->parsePrices($cursus->searchname) : ''; Not in resulset from WebConnect
-        $cursusRecord->cursusid = isset($cursus->cursus_id) ? $cursus->cursus_id : '';
+        $cursusRecord->cursusid = isset($cursus->uitvoering_id) ? $cursus->uitvoering_id : '';
         // $cursusRecord->projectcode = isset($cursus->projectcode) ? $this->parsePrices($cursus->projectcode) : ''; Not in resulset from WebConnect
         // $cursusRecord->notities = $cursus->notities Not in resulset from WebConnect
         $cursusRecord->slug = $this->app['slugify']->slugify($cursus->naam_cursus);
