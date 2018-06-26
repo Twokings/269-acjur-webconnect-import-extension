@@ -12,7 +12,7 @@
             {% if message is iterable %}
                 <li>{{ dump(message) }}</li>
             {% else %}
-                <li>{{ message }}</li>
+                <li>{{ message|raw }}</li>
             {% endif %}
         {% endfor %}
         </ul>

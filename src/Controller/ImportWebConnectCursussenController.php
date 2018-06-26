@@ -55,11 +55,19 @@ class ImportWebConnectCursussenController extends Base
 
         $messages = [];
 
+        $config = $this->app['importwebconnect.config'];
+        $url = $config['remote']['host'] . $config['remote']['uri'];
+        $options= $config['remote']['get_courses']['query'];
+        $message_url = $url . '?' . http_build_query($options);
+        $messages[] = "Importing from: <a href='". $message_url . "'>". $url . "</a>";
+
         if($request->query->get('confirmed') == 'looksgood') {
             $message = 'Starting WebConnect import from site.';
             $this->app['logger.system']->info($message, ['event' => 'import']);
 
             $messages[] = $message;
+
+
             $number_of_cursussen = 0;
             $this->app['importwebconnect.cursussen.service']->depublishAllCursussen();
 
