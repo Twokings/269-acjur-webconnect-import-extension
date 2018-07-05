@@ -224,17 +224,25 @@ class ImportWebConnectCursussenService
         if(isset($cursus->informatie) && count($cursus->informatie) >=1) {
             $cursusbody = '';
             $cursusgoals = '';
+            $cursusreview = '';
+            $cursusaudience = '';
             foreach ($cursus->informatie as $info) {
                 if($info->titel == "Inhoud") {
                     $cursusbody .= $info->inhoud;
                 } elseif($info->titel == "Resultaat") {
                     $cursusgoals .= $info->inhoud;
+                } elseif($info->titel == "Recensies") {
+                    $cursusreview .= $info->inhoud;
+                } elseif($info->titel == "Doelgroep") {
+                    $cursusaudience .= $info->inhoud;
                 } else {
                     $cursusbody .= $info->inhoud;
                 }
             }
             $cursusRecord->body = $cursusbody;
             $cursusRecord->goals = $cursusgoals;
+            $cursusRecord->review = $cursusreview;
+            $cursusRecord->targetaudience = $cursusaudience;
         }
 
         if($cursus->aantal_deelnemers >= $cursus->max_deelnemers) {
