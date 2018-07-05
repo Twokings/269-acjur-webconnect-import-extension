@@ -204,7 +204,8 @@ class ImportWebConnectCursussenService
         }
 
         $cursusRecord->naam = isset($cursus->naam_cursus) ? $cursus->naam_cursus : '' ;
-        $cursusRecord->theme = isset($cursus->themas) ? implode(', ', $cursus->themas) : '';
+        $cursusRecord->theme = isset($cursus->themas) ? reset($cursus->themas) : '';
+        $cursusRecord->themes = isset($cursus->themas) ? implode(', ', $cursus->themas) : '';
         $cursusRecord->pwo = isset($cursus->pwo_punten) ? $cursus->pwo_punten : '';
         $cursusRecord->new = isset($cursus->notitie) ? $cursus->notitie : '';
         $cursusRecord->cost = isset($cursus->prijzen) ? $this->parsePrices($cursus->prijzen) : '';
