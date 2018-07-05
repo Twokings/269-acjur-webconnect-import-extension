@@ -298,9 +298,14 @@ class ImportWebConnectCursussenService
         $parsedPrices = [];
 
         foreach ($prices as $price) {
-            $price = number_format($price['bedrag_excl'], 2, '.', '');
-            $priceText = $price['omschrijving'];
-            $parsedPrices = $price . ' ' . $priceText;
+            if(is_array($price)) {
+              $price = number_format($price['bedrag_excl'], 2, '.', '');
+              $priceText = $price['omschrijving'];
+            } elseif(is_object($price)) {
+              $price = number_format($price->bedrag_excl, 2, '.', '');
+              $priceText = isset($price->omschrijving)?$price->omschrijving: '';
+            }
+            $parsedPrices[] = $price . ' ' . $priceText;
         }
 
         $parsedPrices = implode(', ', $parsedPrices);
