@@ -147,7 +147,12 @@ class ImportWebConnectEventsService
         $eventRecord->event_id = isset($event->event_id) ? $event->event_id : '' ;
         $eventRecord->title = isset($event->naam_event) ? $event->naam_event : '' ;
         // $eventRecord->subtitle = isset($event->subtitle) ? $event->subtitle : ''; Not in resulset from WebConnect
-        $eventRecord->date = isset($event->datum) ? $event->datum : '' ;
+        $eventRecord->date = isset($event->datum) ? $event->datum : '0000-00-00 00:00:00' ;
+        if( !isset($event->datum) || $event->datum == 'null') {
+          $eventRecord->datum_volgt = 1 ;
+        } else {
+          $eventRecord->datum_volgt = 0 ;
+        }
         $eventRecord->location = isset($event->locatie) ? $event->locatie : '' ;
         $eventRecord->eventtype = isset($event->type_event) ? strtolower($event->type_event) : '' ;
         $eventRecord->additionele_info = isset($event->additionele_info) ? $event->additionele_info : '';
