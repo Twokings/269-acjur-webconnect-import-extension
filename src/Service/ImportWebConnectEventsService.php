@@ -168,7 +168,7 @@ class ImportWebConnectEventsService
         $eventRecord->pwo_punten = isset($event->pwo_punten) ? $event->pwo_punten : '';
         $eventRecord->subscribe_link = isset($event->subscribe_link) ? $event->subscribe_link : '';
         // $eventRecord->verslag = isset($event->verslag) ? $event->verslag : ''; Not in resulset from WebConnect
-        $eventRecord->slug = $this->app['slugify']->slugify($event->naam_event);
+        $eventRecord->slug = $this->app['slugify']->slugify($event->naam_event . '-' . $event->event_id);
         $eventRecord->status = 'published';
 
         $this->eventsRepository->save($eventRecord);

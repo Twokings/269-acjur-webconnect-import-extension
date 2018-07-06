@@ -218,7 +218,7 @@ class ImportWebConnectCursussenService
 
         // The unique identifier should be the uitvoering_id
         $cursusRecord->cursusid = isset($cursus->uitvoering_id) ? $cursus->uitvoering_id : '';
-        $cursusRecord->slug = $this->app['slugify']->slugify($cursus->naam_cursus);
+        $cursusRecord->slug = $this->app['slugify']->slugify($cursus->naam_cursus . '-' . $cursus->uitvoering_id);
         $cursusRecord->status = $this->config['remote']['get_courses']['target']['active'];
 
         // Get special information blocks

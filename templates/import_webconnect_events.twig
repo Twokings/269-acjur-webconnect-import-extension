@@ -23,9 +23,9 @@
         {% for result in results.result %}
             {% setcontent existing = 'events' where { 'event_id': result.event_id, 'status': '!' } returnsingle %}
             {% if existing %}
-                <li><a href="{{ existing.editlink() }}">{{ result.event_id }} - {{ result.naam_event }}</a></li>
+                <li>Bestaand: <a href="{{ existing.editlink() }}">event id: {{ result.event_id }} - {{ result.naam_event }}</a></li>
             {% else %}
-                <li>{{ result.event_id }} - {{ result.naam_event }}</li>
+                <li>Nieuw: event id: {{ result.event_id }} - {{ result.naam_event }}</li>
             {% endif %}
         {% endfor %}
         </ul>

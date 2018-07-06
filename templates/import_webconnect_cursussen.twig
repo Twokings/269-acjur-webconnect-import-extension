@@ -21,11 +21,11 @@
     {% if results is defined and results is not empty %}
         <ul>
         {% for result in results.result %}
-            {% setcontent existing = 'cursussen' where { 'cursusid': result.cursus_id, 'status': '!' } returnsingle %}
+            {% setcontent existing = 'cursussen' where { 'cursusid': result.uitvoering_id, 'status': '!' } returnsingle %}
             {% if existing %}
-                <li><a href="{{ existing.editlink() }}">{{ result.cursus_id }} - {{ result.naam_cursus }}</a></li>
+                <li>Bestaand: <a href="{{ existing.editlink() }}">uitvoering id: {{ result.uitvoering_id }} - {{ result.naam_cursus }}</a></li>
             {% else %}
-                <li>{{ result.cursus_id }} - {{ result.naam_cursus }}</li>
+                <li>Nieuw: uitvoering id: {{ result.uitvoering_id }} - {{ result.naam_cursus }}</li>
             {% endif %}
         {% endfor %}
         </ul>
