@@ -6,7 +6,7 @@
 
 {% block page_main %}
 
-    {% if results.status == "fail" %}
+    {% if results and results.status == "fail" %}
         {{ dump(results) }}
     {% endif %}
 
