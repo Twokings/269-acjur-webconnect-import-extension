@@ -6,6 +6,10 @@
 
 {% block page_main %}
 
+    {% if results.status == "fail" %}
+        {{ dump(results) }}
+    {% endif %}
+
     {% if messages is defined and messages is not empty %}
         <ul>
         {% for message in messages %}

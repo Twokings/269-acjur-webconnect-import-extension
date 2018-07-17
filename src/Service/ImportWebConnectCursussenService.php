@@ -203,6 +203,12 @@ class ImportWebConnectCursussenService
             $message = 'Cursus: %s was inserted (%d - %d)';
         }
 
+        // Because the specs say that `themas` is an array, but instead we're receiving a
+        // comma separated string.
+        if (!is_array($cursus->themas)) {
+            $cursus->themas = explode(',', $cursus->themas);
+        }
+
         $cursusRecord->naam = isset($cursus->naam_cursus) ? $cursus->naam_cursus : '' ;
         $cursusRecord->theme = isset($cursus->themas) ? reset($cursus->themas) : '';
         $cursusRecord->themes = isset($cursus->themas) ? implode(', ', $cursus->themas) : '';
@@ -282,7 +288,7 @@ class ImportWebConnectCursussenService
         }
 
         // Save all related planningen in this cursusuitvoering
-        if (!empty($cursus->rooster) && count($cursus->rooster) >= 1) {
+        if (is_iterable($cursus->rooster)) {
             $this->savePlanningen($cursus);
         }
 
