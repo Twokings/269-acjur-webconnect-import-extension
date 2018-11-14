@@ -20,7 +20,10 @@ remote:
         target:
             contenttype: cursussen
             ownerid: 3
-            inactive: published
+            status:
+                inactive: unpublished
+                active: published
+                unknown: draft
     get_events:
         enabled: true
         query:
@@ -30,7 +33,10 @@ remote:
         target:
             contenttype: events
             ownerid: 3
-            inactive: published
+            status:
+                inactive: unpublished
+                active: published
+                unknown: draft
 
 # This option will update the Docenten contenttype when set to false and only save
 # Docenten when set to true.

@@ -92,6 +92,10 @@ class ImportWebConnectEventsService
      */
     public function depublishAllEvents()
     {
+        // the courses will be published / depublished
+        // based on their 'publiceren' status in the API
+
+        /*
       $tablename = $this->eventsRepository->getTableName();
       $active = $this->config['remote']['get_events']['target']['active'];
       $inactive = $this->config['remote']['get_events']['target']['inactive'];
@@ -104,6 +108,7 @@ class ImportWebConnectEventsService
             ]
           );
       }
+        */
     }
 
     /**
@@ -167,6 +172,7 @@ class ImportWebConnectEventsService
 
             $eventRecord->body = $eventbody;
         }
+
         $eventRecord->starttime = isset($event->start_tijd) ? $event->start_tijd : '';
         $eventRecord->endtime = isset($event->eind_tijd) ? $event->eind_tijd : '';
         // $eventRecord->inschrijven_mogelijk = isset($event->inschrijven_mogelijk) ? $event->inschrijven_mogelijk : '' ; Not in resulset from WebConnect
@@ -174,7 +180,14 @@ class ImportWebConnectEventsService
         $eventRecord->subscribe_link = isset($event->subscribe_link) ? $event->subscribe_link : '';
         // $eventRecord->verslag = isset($event->verslag) ? $event->verslag : ''; Not in resulset from WebConnect
         $eventRecord->slug = $this->app['slugify']->slugify($event->naam_event . '-' . $event->event_id);
-        $eventRecord->status = 'published';
+        // Handle all special cases for the status from webconnect
+        if ($event->publiceren === '1') {
+            $eventRecord->status = $this->config['remote']['get_events']['target']['status']['active'];
+        } elseif ($event->publiceren === '0') {
+            $eventRecord->status = $this->config['remote']['get_events']['target']['status']['inactive'];
+        } else {
+            $eventRecord->status = $this->config['remote']['get_events']['target']['status']['unknown'];
+        }
 
         $this->eventsRepository->save($eventRecord);
 

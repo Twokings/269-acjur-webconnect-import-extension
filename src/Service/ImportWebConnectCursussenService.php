@@ -121,6 +121,10 @@ class ImportWebConnectCursussenService
      */
     public function depublishAllCursussen()
     {
+        // the courses will be published / depublished
+        // based on their 'publiceren' status in the API
+
+        /*
       $tablename = $this->cursussenRepository->getTableName();
       $active = $this->config['remote']['get_courses']['target']['active'];
       $inactive = $this->config['remote']['get_courses']['target']['inactive'];
@@ -133,6 +137,7 @@ class ImportWebConnectCursussenService
           ]
         );
       }
+        */
     }
 
     /**
@@ -141,6 +146,7 @@ class ImportWebConnectCursussenService
      * Used to depublish all cursussen before a new import with $this->depublishAllCursussen
      *
      * @param $newvalues
+     * @return mixed
      */
     private function depublishSaveAllCursussen($newvalues)
     {
@@ -166,6 +172,7 @@ class ImportWebConnectCursussenService
      * Used by $this->depublishAllPlanningenByCursus
      *
      * @param $newvalues
+     * @return mixed
      */
     private function deletePlannigen($newvalues)
     {
@@ -203,21 +210,29 @@ class ImportWebConnectCursussenService
             $message = 'Cursus: %s was inserted (%d - %d)';
         }
 
-        // Because the specs say that `themas` is an array, but instead we're receiving a
-        // comma separated string.
-        if (!is_array($cursus->themas)) {
-            $cursus->themas = explode(',', $cursus->themas);
+        $cursusRecord->naam = isset($cursus->naam_cursus) ? $cursus->naam_cursus : '' ;
+
+        if(!empty($cursus->themas)) {
+            if(!is_array($cursus->themas)) {
+                $cursus->themas = explode(',', $cursus->themas);
+                $cursusRecord->theme = isset($cursus->themas) ? reset($cursus->themas) : '';
+                $cursusRecord->themes = isset($cursus->themas) ? implode(', ', $cursus->themas) : '';
+            } elseif(is_string($cursus->themas)) {
+                // assume it's a single theme
+                $cursusRecord->theme = $cursus->themas;
+                $cursusRecord->themes = $cursus->themas;
+            }
+        } else {
+            $cursusRecord->theme = '';
+            $cursusRecord->themes = '';
         }
 
-        $cursusRecord->naam = isset($cursus->naam_cursus) ? $cursus->naam_cursus : '' ;
-        $cursusRecord->theme = isset($cursus->themas) ? reset($cursus->themas) : '';
-        $cursusRecord->themes = isset($cursus->themas) ? implode(', ', $cursus->themas) : '';
         $cursusRecord->pwo = isset($cursus->pwo_punten) ? $cursus->pwo_punten : '';
         $cursusRecord->new = isset($cursus->notitie) ? $cursus->notitie : '';
         $cursusRecord->cost = isset($cursus->prijzen) ? $this->parsePrices($cursus->prijzen) : '';
 
         // link is a reserved name, so rewrite it to inschrijf_link
-        $cursusRecord->inschrijf_link = isset($cursus->link) ? $cursus->link : '' ;
+        $cursusRecord->inschrijf_link = isset($cursus->link) ? $cursus->link : '';
 
         $cursusRecord->start_date = isset($cursus->start_datum) ? $cursus->start_datum : '';
         $cursusRecord->end_date = isset($cursus->eind_datum) ? $cursus->eind_datum : '';
@@ -225,7 +240,15 @@ class ImportWebConnectCursussenService
         // The unique identifier should be the uitvoering_id
         $cursusRecord->cursusid = isset($cursus->uitvoering_id) ? $cursus->uitvoering_id : '';
         $cursusRecord->slug = $this->app['slugify']->slugify($cursus->naam_cursus . '-' . $cursus->uitvoering_id);
-        $cursusRecord->status = $this->config['remote']['get_courses']['target']['active'];
+
+        // Handle all special cases for the status from webconnect
+        if ($cursus->publiceren === '1') {
+            $cursusRecord->status = $this->config['remote']['get_courses']['target']['status']['active'];
+        } elseif ($cursus->publiceren === '0') {
+            $cursusRecord->status = $this->config['remote']['get_courses']['target']['status']['inactive'];
+        } else {
+            $cursusRecord->status = $this->config['remote']['get_courses']['target']['status']['unknown'];
+        }
 
         // Get special information blocks
         if(isset($cursus->informatie) && count($cursus->informatie) >=1) {
@@ -288,7 +311,7 @@ class ImportWebConnectCursussenService
         }
 
         // Save all related planningen in this cursusuitvoering
-        if (is_iterable($cursus->rooster)) {
+        if (!empty($cursus->rooster) && count($cursus->rooster) >= 1) {
             $this->savePlanningen($cursus);
         }
 
@@ -326,7 +349,6 @@ class ImportWebConnectCursussenService
      * This part removes all planningen for a given cursus ($cursus->uitvoering_id) before inserting the new ones
      *
      * @param $cursus
-     * @param $record
      */
     private function savePlanningen($cursus)
     {
@@ -387,8 +409,7 @@ class ImportWebConnectCursussenService
      * This function will Save a new Docent or Update a Docent if it already exists.
      * For updates to work 'save_only' option has to be set to false in extensions' cofig.yml
      *
-     * @param $cursus
-     * @param $record
+     * @param $docent
      */
     private function saveDocent($docent)
     {

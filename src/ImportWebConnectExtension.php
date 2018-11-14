@@ -111,8 +111,13 @@ class ImportWebConnectExtension extends SimpleExtension
                     'target' => [
                         'contenttype' => 'cursussen',
                         'ownerid' => 3,
-                        'active' => 'published',
-                        'inactive' => 'published',
+                        'active' => 'published', // legacy value
+                        'inactive' => 'published', // legacy value
+                        'status' => [
+                            'active' => 'published',
+                            'inactive' => 'published',
+                            'unknown' => 'draft'
+                        ],
                         'planningcontenttype' => 'planningen',
                         'docentencontenttype' => 'docenten',
                     ]
@@ -125,8 +130,13 @@ class ImportWebConnectExtension extends SimpleExtension
                     'target' => [
                         'contenttype' => 'events',
                         'ownerid' => 3,
-                        'active' => 'published',
-                        'inactive' => 'published',
+                        'active' => 'published', // legacy value
+                        'inactive' => 'published', // legacy value
+                        'status' => [
+                            'active' => 'published',
+                            'inactive' => 'published',
+                            'unknown' => 'draft'
+                        ]
                     ]
                 ]
             ],
