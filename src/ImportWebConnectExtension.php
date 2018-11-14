@@ -114,7 +114,7 @@ class ImportWebConnectExtension extends SimpleExtension
                         'inactive' => 'published', // legacy value
                         'status' => [
                             'active' => 'published',
-                            'inactive' => 'published',
+                            'inactive' => 'held',
                             'unknown' => 'draft'
                         ],
                         'planningcontenttype' => 'planningen',
@@ -133,7 +133,7 @@ class ImportWebConnectExtension extends SimpleExtension
                         'inactive' => 'published', // legacy value
                         'status' => [
                             'active' => 'published',
-                            'inactive' => 'published',
+                            'inactive' => 'held',
                             'unknown' => 'draft'
                         ]
                     ]
