@@ -31,14 +31,14 @@ class ImportWebConnectCursussenController extends Base
     /**
      * Check if the current user is logged in.
      *
-     * @param Request     $request
+     * @param Request $request
      * @param Application $app
      */
     public function before(Request $request, Application $app)
     {
         $token = $app['session']->get('authentication', false);
 
-        if (! $token) {
+        if (!$token) {
             return $this->redirectToRoute('dashboard');
         }
     }
@@ -47,7 +47,7 @@ class ImportWebConnectCursussenController extends Base
      *
      *
      * @param Application $app
-     * @param Request     $request
+     * @param Request $request
      */
     public function importwebconnectBackendPage(Request $request)
     {
@@ -57,20 +57,21 @@ class ImportWebConnectCursussenController extends Base
 
         $config = $this->app['importwebconnect.config'];
         $url = $config['remote']['host'] . $config['remote']['uri'];
-        $options= $config['remote']['get_courses']['query'];
+        $options = $config['remote']['get_courses']['query'];
         $message_url = $url . '?' . http_build_query($options);
-        $messages[] = "Importing from: <a href='". $message_url . "'>". $url . "</a>";
+        $messages[] = "Importing from: <a href='" . $message_url . "'>" . $url . "</a>";
 
-        if($request->query->get('confirmed') == 'looksgood') {
+        if ($request->query->get('confirmed') == 'looksgood') {
             $message = 'Starting WebConnect import from site.';
             $this->app['logger.system']->info($message, ['event' => 'import']);
 
             $messages[] = $message;
 
+
             $number_of_cursussen = 0;
             $this->app['importwebconnect.cursussen.service']->depublishAllCursussen();
 
-            foreach($results->result as $cursus) {
+            foreach ($results->result as $cursus) {
                 $messages[] = $this->app['importwebconnect.cursussen.service']->saveCursus($cursus);
                 $number_of_cursussen++;
             }
@@ -83,7 +84,7 @@ class ImportWebConnectCursussenController extends Base
 
 
         $html = $this->render('@importwebconnect/import_webconnect_cursussen.twig', [
-            'title'  => 'Import WebConnect Cursussen',
+            'title' => 'Import WebConnect Cursussen',
             'results' => $results,
             'messages' => $messages
         ], []);

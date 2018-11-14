@@ -41,22 +41,22 @@ class ImportWebConnectProvider implements ServiceProviderInterface
         $app['importwebconnect.cursussen.service'] = $app->share(
             function (Application $app) {
                 return new ImportWebConnectCursussenService(
-                     $app,
-                     $app['guzzle.client'],
-                     $app['logger.system']
-                 );
+                    $app,
+                    $app['guzzle.client'],
+                    $app['logger.system']
+                );
             }
-         );
+        );
 
-         $app['importwebconnect.events.service'] = $app->share(
+        $app['importwebconnect.events.service'] = $app->share(
             function (Application $app) {
                 return new ImportWebConnectEventsService(
-                     $app,
-                     $app['guzzle.client'],
-                     $app['logger.system']
-                 );
+                    $app,
+                    $app['guzzle.client'],
+                    $app['logger.system']
+                );
             }
-         );
+        );
     }
 
     /**

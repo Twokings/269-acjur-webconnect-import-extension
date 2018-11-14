@@ -120,7 +120,7 @@ class ImportWebConnectEventsService
      */
     private function depublishSaveAllEvents($newvalues)
     {
-      return $this->app['db']->prepare('UPDATE ' . $newvalues['table'] . ' SET ' . $newvalues['field'] . ' = "' . $newvalues['value'] . '"')->execute();
+        return $this->app['db']->prepare('UPDATE ' . $newvalues['table'] . ' SET ' . $newvalues['field'] . ' = "' . $newvalues['value'] . '"')->execute();
     }
 
     /**
@@ -134,7 +134,7 @@ class ImportWebConnectEventsService
     /**
      * Save an event to the contenttype given in the config
      *
-     * @param $event: An event that has to be inserted
+     * @param $event : An event that has to be inserted
      *
      * @return string (message with some status info)
      */
@@ -143,27 +143,27 @@ class ImportWebConnectEventsService
         $eventRecord = $this->eventsRepository->findOneBy(['event_id' => $event->event_id]);
         $message = 'Event: %s was updated (%d - %d)';
         // no record found - prepare a blank one
-        if(!$eventRecord) {
+        if (!$eventRecord) {
             $eventRecord = new Content();
             $eventRecord->datepublish = new DateTime();
             $eventRecord->ownerid = $this->config['remote']['get_events']['target']['ownerid'];
             $message = 'Event: %s was inserted (%d - %d)';
         }
-        $eventRecord->event_id = isset($event->event_id) ? $event->event_id : '' ;
-        $eventRecord->title = isset($event->naam_event) ? $event->naam_event : '' ;
+        $eventRecord->event_id = isset($event->event_id) ? $event->event_id : '';
+        $eventRecord->title = isset($event->naam_event) ? $event->naam_event : '';
         // $eventRecord->subtitle = isset($event->subtitle) ? $event->subtitle : ''; Not in resulset from WebConnect
-        $eventRecord->date = isset($event->datum) ? $event->datum : '0000-00-00 00:00:00' ;
-        if( !isset($event->datum) || $event->datum == 'null') {
-          $eventRecord->datum_volgt = 1 ;
+        $eventRecord->date = isset($event->datum) ? $event->datum : '0000-00-00 00:00:00';
+        if (!isset($event->datum) || $event->datum == 'null') {
+            $eventRecord->datum_volgt = 1;
         } else {
-          $eventRecord->datum_volgt = 0 ;
+            $eventRecord->datum_volgt = 0;
         }
-        $eventRecord->location = isset($event->locatie) ? $event->locatie : '' ;
-        $eventRecord->eventtype = isset($event->type_event) ? strtolower($event->type_event) : '' ;
+        $eventRecord->location = isset($event->locatie) ? $event->locatie : '';
+        $eventRecord->eventtype = isset($event->type_event) ? strtolower($event->type_event) : '';
         $eventRecord->additionele_info = isset($event->additionele_info) ? $event->additionele_info : '';
         $eventRecord->doelgroep = isset($event->doelgroep) ? $event->doelgroep : '';
 
-        if(isset($event->informatie) && count($event->informatie) >=1) {
+        if (isset($event->informatie) && count($event->informatie) >= 1) {
 
             $eventbody = '';
             foreach ($event->informatie as $info) {

@@ -37,8 +37,7 @@ class ImportWebConnectExtension extends SimpleExtension
         $adminMenuEntry = (new MenuEntry('importwebconnect-backend-page', 'importwebconnect'))
             ->setLabel('Import WebConnect')
             ->setIcon('fa:child')
-            ->setPermission('extensions')
-        ;
+            ->setPermission('extensions');
 
         return [$adminMenuEntry];
     }
@@ -60,9 +59,9 @@ class ImportWebConnectExtension extends SimpleExtension
     protected function registerBackendControllers()
     {
         return [
-            '/extensions/importwebconnect'           => new Controller\ImportWebConnectController(),
+            '/extensions/importwebconnect' => new Controller\ImportWebConnectController(),
             '/extensions/importwebconnect/cursussen' => new Controller\ImportWebConnectCursussenController(),
-            '/extensions/importwebconnect/events'    => new Controller\ImportWebConnectEventsController(),
+            '/extensions/importwebconnect/events' => new Controller\ImportWebConnectEventsController(),
         ];
     }
 
@@ -84,7 +83,7 @@ class ImportWebConnectExtension extends SimpleExtension
     {
         return [
             'templates' => [
-                'position'  => 'prepend',
+                'position' => 'prepend',
                 'namespace' => 'importwebconnect'
             ]
         ];

@@ -31,14 +31,14 @@ class ImportWebConnectController extends Base
     /**
      * Check if the current user is logged in.
      *
-     * @param Request     $request
+     * @param Request $request
      * @param Application $app
      */
     public function before(Request $request, Application $app)
     {
         $token = $app['session']->get('authentication', false);
 
-        if (! $token) {
+        if (!$token) {
             return $this->redirectToRoute('dashboard');
         }
     }
@@ -47,12 +47,12 @@ class ImportWebConnectController extends Base
      *
      *
      * @param Application $app
-     * @param Request     $request
+     * @param Request $request
      */
     public function importwebconnectBackendPage(Request $request)
     {
         $html = $this->render('@importwebconnect/import_webconnect.twig', [
-            'title'  => 'Import WebConnect',
+            'title' => 'Import WebConnect',
         ], []);
 
         return $html;

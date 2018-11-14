@@ -16,49 +16,48 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ImportWebConnectCommand extends BaseCommand
 {
     protected function configure()
-  {
-    $this
-      ->setName('importwebconnect:import')
-      ->setDescription('Import cursussen from WebConnect')
-      ->addOption(
-        'log',
-        null,
-        InputOption::VALUE_NONE,
-        'Show log in console.'
-     )
-    ;
-  }
-
-  protected function execute(InputInterface $input, OutputInterface $output)
-  {
-    $messages = [];
-
-    $results = $this->app['importwebconnect.cursussen.service']->fetchData();
-
-    $message = 'Starting WebConnect import';
-    if ($input->getOption('log')) {
-      $output->writeln($message);
+    {
+        $this
+            ->setName('importwebconnect:import')
+            ->setDescription('Import cursussen from WebConnect')
+            ->addOption(
+                'log',
+                null,
+                InputOption::VALUE_NONE,
+                'Show log in console.'
+            );
     }
-    $this->app['logger.system']->info($message, ['event' => 'import']);
 
-    $this->app['importwebconnect.cursussen.service']->depublishAllCursussen();
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $messages = [];
 
-    $number_of_cursussen = 0;
+        $results = $this->app['importwebconnect.cursussen.service']->fetchData();
 
-    foreach($results->result as $cursus) {
-        $message = $this->app['importwebconnect.cursussen.service']->saveCursus($cursus);
-
+        $message = 'Starting WebConnect import';
         if ($input->getOption('log')) {
-          $output->writeln($message);
+            $output->writeln($message);
+        }
+        $this->app['logger.system']->info($message, ['event' => 'import']);
+
+        $this->app['importwebconnect.cursussen.service']->depublishAllCursussen();
+
+        $number_of_cursussen = 0;
+
+        foreach ($results->result as $cursus) {
+            $message = $this->app['importwebconnect.cursussen.service']->saveCursus($cursus);
+
+            if ($input->getOption('log')) {
+                $output->writeln($message);
+            }
+
+            $number_of_cursussen++;
         }
 
-        $number_of_cursussen++;
+        $message = 'Finished WebConnect import, ' . $number_of_cursussen . ' cursus records imported.';
+        if ($input->getOption('log')) {
+            $output->writeln($message);
+        }
+        $this->app['logger.system']->info($message, ['event' => 'import']);
     }
-
-    $message = 'Finished WebConnect import, ' . $number_of_cursussen . ' cursus records imported.';
-    if ($input->getOption('log')) {
-      $output->writeln($message);
-    }
-    $this->app['logger.system']->info($message, ['event' => 'import']);
-  }
 }

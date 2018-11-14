@@ -111,7 +111,7 @@ class ImportWebConnectCursussenService
     {
         $cursussen = $data->result;
 
-        foreach($cursussen as $cursuskey => $cursus ) {
+        foreach ($cursussen as $cursuskey => $cursus) {
             $this->saveCursus($cursus);
         }
     }
@@ -150,7 +150,7 @@ class ImportWebConnectCursussenService
      */
     private function depublishSaveAllCursussen($newvalues)
     {
-      return $this->app['db']->prepare('UPDATE ' . $newvalues['table'] . ' SET ' . $newvalues['field'] . ' = "' . $newvalues['value'] . '"')->execute();
+        return $this->app['db']->prepare('UPDATE ' . $newvalues['table'] . ' SET ' . $newvalues['field'] . ' = "' . $newvalues['value'] . '"')->execute();
     }
 
     /**
@@ -158,12 +158,12 @@ class ImportWebConnectCursussenService
      */
     public function depublishAllPlanningenByCursus($cursus_id)
     {
-      $tablename = $this->planningenRepository->getTableName();
-      return $this->deletePlannigen([
-        'table' => $tablename,
-        'field' => 'cursus_id',
-        'value' => $cursus_id
-      ]);
+        $tablename = $this->planningenRepository->getTableName();
+        return $this->deletePlannigen([
+            'table' => $tablename,
+            'field' => 'cursus_id',
+            'value' => $cursus_id
+        ]);
     }
 
     /**
@@ -176,7 +176,7 @@ class ImportWebConnectCursussenService
      */
     private function deletePlannigen($newvalues)
     {
-      return $this->app['db']->prepare('DELETE FROM ' . $newvalues['table'] . ' WHERE ' . $newvalues['field'] . ' = "' . $newvalues['value'] . '"')->execute();
+        return $this->app['db']->prepare('DELETE FROM ' . $newvalues['table'] . ' WHERE ' . $newvalues['field'] . ' = "' . $newvalues['value'] . '"')->execute();
     }
 
     /**
@@ -193,7 +193,7 @@ class ImportWebConnectCursussenService
      * Cursussen with negative studiepunten are unpublished by default
      * Also saves planningen for a cursus if they exist
      *
-     * @param $cursus: A cursus that has gone through $this->parseNiceRecord
+     * @param $cursus : A cursus that has gone through $this->parseNiceRecord
      *
      * @return string (message with some status info)
      */
@@ -203,21 +203,21 @@ class ImportWebConnectCursussenService
         $message = 'Cursus: %s was updated (%d - %d)';
 
         // no record found - prepare a blank one
-        if(!$cursusRecord) {
+        if (!$cursusRecord) {
             $cursusRecord = new Content();
             $cursusRecord->datepublish = new DateTime();
             $cursusRecord->ownerid = $this->config['remote']['get_courses']['target']['ownerid'];
             $message = 'Cursus: %s was inserted (%d - %d)';
         }
 
-        $cursusRecord->naam = isset($cursus->naam_cursus) ? $cursus->naam_cursus : '' ;
+        $cursusRecord->naam = isset($cursus->naam_cursus) ? $cursus->naam_cursus : '';
 
-        if(!empty($cursus->themas)) {
-            if(!is_array($cursus->themas)) {
+        if (!empty($cursus->themas)) {
+            if (!is_array($cursus->themas)) {
                 $cursus->themas = explode(',', $cursus->themas);
                 $cursusRecord->theme = isset($cursus->themas) ? reset($cursus->themas) : '';
                 $cursusRecord->themes = isset($cursus->themas) ? implode(', ', $cursus->themas) : '';
-            } elseif(is_string($cursus->themas)) {
+            } elseif (is_string($cursus->themas)) {
                 // assume it's a single theme
                 $cursusRecord->theme = $cursus->themas;
                 $cursusRecord->themes = $cursus->themas;
@@ -251,19 +251,19 @@ class ImportWebConnectCursussenService
         }
 
         // Get special information blocks
-        if(isset($cursus->informatie) && count($cursus->informatie) >=1) {
+        if (isset($cursus->informatie) && count($cursus->informatie) >= 1) {
             $cursusbody = '';
             $cursusgoals = '';
             $cursusreview = '';
             $cursusaudience = '';
             foreach ($cursus->informatie as $info) {
-                if($info->titel == "Inhoud") {
+                if ($info->titel == "Inhoud") {
                     $cursusbody .= $info->inhoud;
-                } elseif($info->titel == "Resultaat") {
+                } elseif ($info->titel == "Resultaat") {
                     $cursusgoals .= $info->inhoud;
-                } elseif($info->titel == "Recensies") {
+                } elseif ($info->titel == "Recensies") {
                     $cursusreview .= $info->inhoud;
-                } elseif($info->titel == "Doelgroep") {
+                } elseif ($info->titel == "Doelgroep") {
                     $cursusaudience .= $info->inhoud;
                 } else {
                     $cursusbody .= $info->inhoud;
@@ -275,7 +275,7 @@ class ImportWebConnectCursussenService
             $cursusRecord->targetaudience = $cursusaudience;
         }
 
-        if($cursus->aantal_deelnemers >= $cursus->max_deelnemers) {
+        if ($cursus->aantal_deelnemers >= $cursus->max_deelnemers) {
             $cursusRecord->inschrijven_mogelijk = 1;
         } else {
             $cursusRecord->inschrijven_mogelijk = 0;
@@ -305,9 +305,9 @@ class ImportWebConnectCursussenService
 
         // Save all related docenten in this cursusuitvoering
         if (!empty($cursus->docent) && count($cursus->docent) >= 1) {
-          foreach ($cursus->docent as $docent) {
-            $this->saveDocent($docent);
-          }
+            foreach ($cursus->docent as $docent) {
+                $this->saveDocent($docent);
+            }
         }
 
         // Save all related planningen in this cursusuitvoering
@@ -328,12 +328,12 @@ class ImportWebConnectCursussenService
         $parsedPrices = [];
 
         foreach ($prices as $price) {
-            if(is_array($price)) {
-              $price = number_format($price['bedrag_excl'], 2, '.', '');
-              $priceText = $price['omschrijving'];
-            } elseif(is_object($price)) {
-              $price = number_format($price->bedrag_excl, 2, '.', '');
-              $priceText = isset($price->omschrijving)?$price->omschrijving: '';
+            if (is_array($price)) {
+                $price = number_format($price['bedrag_excl'], 2, '.', '');
+                $priceText = $price['omschrijving'];
+            } elseif (is_object($price)) {
+                $price = number_format($price->bedrag_excl, 2, '.', '');
+                $priceText = isset($price->omschrijving) ? $price->omschrijving : '';
             }
             $parsedPrices[] = $price . ' ' . $priceText;
         }
@@ -353,11 +353,11 @@ class ImportWebConnectCursussenService
     private function savePlanningen($cursus)
     {
         $this->depublishAllPlanningenByCursus($cursus->uitvoering_id);
-        foreach($cursus->rooster as $planning) {
+        foreach ($cursus->rooster as $planning) {
             $planrecord = $this->planningenRepository->findOneBy(['rooster_id' => $planning->rooster_id, 'cursus_id' => $cursus->uitvoering_id]);
             $message = 'Planning: %s / %s was updated (%d)';
 
-            if(!$planrecord) {
+            if (!$planrecord) {
                 $message = 'Planning: %s / %s was inserted (%d)';
 
                 // echo '<p>saving cursusplanning '.$planning->start_tijd .' for '. $cursus->uitvoering_id . '</p>';
@@ -375,12 +375,12 @@ class ImportWebConnectCursussenService
                 $planrecord->rooster_id = $planning->rooster_id;
                 $planrecord->locatie = $planning->locatie;
                 $docentenIds = [];
-                foreach($planning->docenten as $docent) {
+                foreach ($planning->docenten as $docent) {
                     array_push($docentenIds, $docent->id);
                 }
                 $planrecord->docent = join(',', $docentenIds); //Comma separeted list of IDs
 
-            } elseif( $this->config['save_only'] == false ) {
+            } elseif ($this->config['save_only'] == false) {
                 $planrecord->ownerid = $this->config['remote']['get_courses']['target']['ownerid'];
                 $planrecord->status = 'published';
                 $planrecord->onderwerp = $planning->naam;
@@ -390,7 +390,7 @@ class ImportWebConnectCursussenService
                 $planrecord->end_date = $enddate;
                 $planrecord->locatie = $planning->locatie;
                 $docentenIds = [];
-                foreach($planning->docenten as $docent) {
+                foreach ($planning->docenten as $docent) {
                     array_push($docentenIds, $docent->id);
                 }
                 $planrecord->docent = join(',', $docentenIds); //Comma separeted list of IDs
@@ -417,7 +417,7 @@ class ImportWebConnectCursussenService
 
         $message = 'Docent: %s was updated (%d)';
 
-        if(!$docentRecord) {
+        if (!$docentRecord) {
             $message = 'Docent: %s was inserted (%d)';
             $docentRecord = new Content();
             $docentRecord->datepublish = new DateTime();
@@ -428,7 +428,7 @@ class ImportWebConnectCursussenService
             $docentRecord->naam_docent = $docent->naam_docent;
             $docentRecord->functie = $docent->functie;
             $docentRecord->naam_bedrijf = $docent->naam_bedrijf;
-        } elseif($this->config['save_only'] == false) {
+        } elseif ($this->config['save_only'] == false) {
             $docentRecord->datechanged = new DateTime();
             $docentRecord->naam_docent = $docent->naam_docent;
             $docentRecord->functie = $docent->functie;

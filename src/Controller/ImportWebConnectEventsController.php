@@ -31,14 +31,14 @@ class ImportWebConnectEventsController extends Base
     /**
      * Check if the current user is logged in.
      *
-     * @param Request     $request
+     * @param Request $request
      * @param Application $app
      */
     public function before(Request $request, Application $app)
     {
         $token = $app['session']->get('authentication', false);
 
-        if (! $token) {
+        if (!$token) {
             return $this->redirectToRoute('dashboard');
         }
     }
@@ -48,7 +48,7 @@ class ImportWebConnectEventsController extends Base
      * route is matched.
      *
      * @param Application $app
-     * @param Request     $request
+     * @param Request $request
      */
     public function importwebconnectBackendPage(Request $request)
     {
@@ -57,11 +57,11 @@ class ImportWebConnectEventsController extends Base
 
         $config = $this->app['importwebconnect.config'];
         $url = $config['remote']['host'] . $config['remote']['uri'];
-        $options= $config['remote']['get_events']['query'];
+        $options = $config['remote']['get_events']['query'];
         $message_url = $url . '?' . http_build_query($options);
-        $messages[] = "Importing from: <a href='". $message_url . "'>". $url . "</a>";
+        $messages[] = "Importing from: <a href='" . $message_url . "'>" . $url . "</a>";
 
-        if($request->query->get('confirmed') == 'looksgood') {
+        if ($request->query->get('confirmed') == 'looksgood') {
             $message = 'Starting WebConnect import from site.';
             $this->app['logger.system']->info($message, ['event' => 'import']);
 
@@ -70,7 +70,7 @@ class ImportWebConnectEventsController extends Base
             $number_of_events = 0;
             $this->app['importwebconnect.events.service']->depublishAllEvents();
 
-            foreach($results->result as $event) {
+            foreach ($results->result as $event) {
                 $messages[] = $this->app['importwebconnect.events.service']->saveEvent($event);
                 $number_of_events++;
             }
@@ -82,7 +82,7 @@ class ImportWebConnectEventsController extends Base
         }
 
         $html = $this->render('@importwebconnect/import_webconnect_events.twig', [
-            'title'  => 'Import WebConnect Events',
+            'title' => 'Import WebConnect Events',
             'results' => $results,
             'messages' => $messages
         ], []);
