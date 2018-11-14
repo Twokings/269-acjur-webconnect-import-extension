@@ -1,10 +1,8 @@
-Bolt Extension Starter
-======================
+Bolt Extension Import Webconnect
+================================
 
-A starter skeleton for a Bolt v3.x Extension
+This extension imports cursussen and evenementen from the webconnect API
 
-To get going run the following command, replacing the last argument with the name of your extension:
+## configuration
 
-`composer create-project --no-install 'bolt/bolt-extension-starter:^3.0' <newextname>`  
-
-For more information, see this page in the Bolt documentation: https://docs.bolt.cm/extensions/building-starter/about
+Set the credentials and api endpoints in  `app/config/extensions/importwebconnect.twokings_local.yml`
