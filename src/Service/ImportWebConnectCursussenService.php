@@ -276,9 +276,9 @@ class ImportWebConnectCursussenService
         }
 
         if ($cursus->aantal_deelnemers >= $cursus->max_deelnemers) {
-            $cursusRecord->inschrijven_mogelijk = 1;
+            $cursusRecord->inschrijven_niet_mogelijk = 1;
         } else {
-            $cursusRecord->inschrijven_mogelijk = 0;
+            $cursusRecord->inschrijven_niet_mogelijk = 0;
         }
 
         // Not in resulset from WebConnect
