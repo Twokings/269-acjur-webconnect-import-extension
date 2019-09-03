@@ -173,6 +173,9 @@ class ImportWebConnectEventsService
             $eventRecord->body = $eventbody;
         }
 
+        // link is a reserved name, so rewrite it to inschrijf_link
+        $eventRecord->inschrijf_link = isset($event->link) ? $event->link : '';
+
         $eventRecord->starttime = isset($event->start_tijd) ? $event->start_tijd : '';
         $eventRecord->endtime = isset($event->eind_tijd) ? $event->eind_tijd : '';
         // $eventRecord->inschrijven_mogelijk = isset($event->inschrijven_mogelijk) ? $event->inschrijven_mogelijk : '' ; Not in resulset from WebConnect
