@@ -173,6 +173,8 @@ class ImportWebConnectEventsService
             $eventRecord->body = $eventbody;
         }
 
+        $eventRecord->comment = isset($event->notitie) ? $event->notitie : '';
+
         // link is a reserved name, so rewrite it to inschrijf_link
         $eventRecord->inschrijf_link = isset($event->link) ? $event->link : '';
 
