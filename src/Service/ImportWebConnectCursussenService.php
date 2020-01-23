@@ -242,9 +242,9 @@ class ImportWebConnectCursussenService
         $cursusRecord->slug = $this->app['slugify']->slugify($cursus->naam_cursus . '-' . $cursus->uitvoering_id);
 
         // Handle all special cases for the status from webconnect
-        if ($cursus->publiceren === '1') {
+        if ($cursus->publiceren === '1' || $cursus->publiceren === 1) {
             $cursusRecord->status = $this->config['remote']['get_courses']['target']['status']['active'];
-        } elseif ($cursus->publiceren === '0') {
+        } elseif ($cursus->publiceren === '0' || $cursus->publiceren === 0) {
             $cursusRecord->status = $this->config['remote']['get_courses']['target']['status']['inactive'];
         } else {
             $cursusRecord->status = $this->config['remote']['get_courses']['target']['status']['unknown'];
