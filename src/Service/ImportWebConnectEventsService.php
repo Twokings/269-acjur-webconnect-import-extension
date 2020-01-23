@@ -185,10 +185,11 @@ class ImportWebConnectEventsService
         $eventRecord->subscribe_link = isset($event->subscribe_link) ? $event->subscribe_link : '';
         // $eventRecord->verslag = isset($event->verslag) ? $event->verslag : ''; Not in resulset from WebConnect
         $eventRecord->slug = $this->app['slugify']->slugify($event->naam_event . '-' . $event->event_id);
+        
         // Handle all special cases for the status from webconnect
-        if ($event->publiceren === '1') {
+        if ($event->publiceren === '1' || $event->publiceren === 1) {
             $eventRecord->status = $this->config['remote']['get_events']['target']['status']['active'];
-        } elseif ($event->publiceren === '0') {
+        } elseif ($event->publiceren === '0' || $event->publiceren === 0) {
             $eventRecord->status = $this->config['remote']['get_events']['target']['status']['inactive'];
         } else {
             $eventRecord->status = $this->config['remote']['get_events']['target']['status']['unknown'];
