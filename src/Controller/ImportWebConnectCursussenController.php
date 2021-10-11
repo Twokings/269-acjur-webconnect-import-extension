@@ -61,6 +61,10 @@ class ImportWebConnectCursussenController extends Base
         $message_url = $url . '?' . http_build_query($options);
         $messages[] = "Importing from: <a href='" . $message_url . "'>" . $url . "</a>";
 
+        // dump($message_url);
+
+        set_time_limit(0);
+
         if ($request->query->get('confirmed') == 'looksgood') {
             $message = 'Starting WebConnect import from site.';
             $this->app['logger.system']->info($message, ['event' => 'import']);

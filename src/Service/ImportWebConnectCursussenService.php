@@ -301,6 +301,24 @@ class ImportWebConnectCursussenService
         // $cursusRecord->projectcode = isset($cursus->projectcode) ? $this->parsePrices($cursus->projectcode) : '';
         // $cursusRecord->notities = $cursus->notities;
 
+        // Opletten dat we geen negatieve datums in proberen te voegen
+        if ($cursusRecord->datecreated < "0000") {
+            $cursusRecord->datecreated = new DateTime('1970-01-01');
+        }
+        if ($cursusRecord->datedepublish < "0000") {
+            $cursusRecord->datedepublish = new DateTime('1970-01-01');
+        }
+
+        if (!empty($cursus->opleidingscoordinator)) {
+            $coo = current($cursus->opleidingscoordinator);
+            // dump($coo);
+
+            $cursusRecord->coordinator_naam = $coo->naam;
+            $cursusRecord->coordinator_functie = $coo->functie;
+            $cursusRecord->coordinator_email = $coo->email;
+            $cursusRecord->coordinator_telefoon = $coo->telefoon;
+        }
+
         $this->cursussenRepository->save($cursusRecord);
 
         // Save all related docenten in this cursusuitvoering
@@ -310,11 +328,18 @@ class ImportWebConnectCursussenService
             }
         }
 
+        // dump($cursus->opleidingscoordinator);
+
+        // if ($cursus->uitvoering_id == 1473) {
+        // if ($cursus->uitvoering_id == 1540) {
+            // dump($cursus->uitvoering_id);
+            // dump($cursusRecord);
+        // }
+
         // Save all related planningen in this cursusuitvoering
         if (!empty($cursus->rooster) && count($cursus->rooster) >= 1) {
             $this->savePlanningen($cursus);
         }
-
 
         $message = sprintf($message, $cursusRecord->naam, $cursusRecord->cursusid, $cursusRecord->id);
         $this->logger->info($message, ['event' => 'import']);
@@ -366,7 +391,7 @@ class ImportWebConnectCursussenService
                 $planrecord->ownerid = $this->config['remote']['get_courses']['target']['ownerid'];
                 $planrecord->status = 'published';
                 $planrecord->onderwerp = $planning->naam;
-                $planrecord->slug = $this->app['slugify']->slugify($planning->naam);
+                $planrecord->slug = mb_substr($this->app['slugify']->slugify($planning->naam), 0, 127);
                 $startdate = date("Y-m-d H:i:s", strtotime($planning->datum . ' ' . $planning->start_tijd));
                 $planrecord->start_date = $startdate;
                 $enddate = date("Y-m-d H:i:s", strtotime($planning->datum . ' ' . $planning->eind_tijd));
