@@ -24,7 +24,7 @@
 
     {% if results is defined and results is not empty %}
         <ul>
-        {% for result in results.result %}
+        {% for result in results.result|default %}
             {% setcontent existing = 'events' where { 'event_id': result.event_id, 'status': '!' } returnsingle %}
             {% if existing %}
                 <li>Bestaand: <a href="{{ existing.editlink() }}">event id: {{ result.event_id }} - {{ result.naam_event }}</a></li>
