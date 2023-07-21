@@ -319,6 +319,14 @@ class ImportWebConnectCursussenService
             $cursusRecord->coordinator_telefoon = $coo->telefoon;
         }
 
+        if (!empty($cursus->soort_maatwerk)) {
+            $cursusRecord->soort_maatwerk = $cursus->soort_maatwerk;
+        }
+        
+        if (!empty($cursus->contactbedrijf)) {
+            $cursusRecord->contact_bedrijf = $cursus->contactbedrijf;
+        }
+
         $this->cursussenRepository->save($cursusRecord);
 
         // Save all related docenten in this cursusuitvoering
