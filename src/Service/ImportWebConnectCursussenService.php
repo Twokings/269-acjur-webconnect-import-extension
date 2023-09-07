@@ -320,7 +320,11 @@ class ImportWebConnectCursussenService
         }
 
         if (!empty($cursus->soort_maatwerk)) {
+            // dump("maatwerk is INGEVULD");
             $cursusRecord->soort_maatwerk = $cursus->soort_maatwerk;
+        } else {
+            // dump("maatwerk is EMPTY");
+            $cursusRecord->soort_maatwerk = 'reguliereCursus';
         }
         
         if (!empty($cursus->contactbedrijf)) {
